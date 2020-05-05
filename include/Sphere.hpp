@@ -1,7 +1,6 @@
 #ifndef SPHERE_HPP
 #define SPHERE_HPP
 #include "Hitable.hpp"
-#include "Utils.hpp"
 #include <cstdio>
 
 /*
@@ -12,7 +11,7 @@ class Sphere : public Hitable
 {
   public:
     Sphere() {}
-    Sphere(vec3 cen, float r, Material *m) : Hitable(m), center(cen), radius(r) {}
+    Sphere(vec3 cen, float r, shared_ptr<Material> m) : Hitable(m), center(cen), radius(r) {}
     inline virtual bool hit(const Ray &r, float tmin, float tmax, Hit &rec) const override;
     inline virtual bool bounding_box(float t0, float t1, AABB &box) const override;
     /*data*/
@@ -33,8 +32,8 @@ class MovingSphere : public Hitable
      * 注意球在两个时刻之外仍然有运动，只是声明t0,t1用于计算
      * 因此不必和Camera中的快门开关时间匹配
      */
-    MovingSphere(vec3 cen0, vec3 cen1, float t0, float t1, float r, Material *m)
-        : center0(cen0), center1(cen1), time0(t0), time1(t1), radius(r), material_p(m){};
+    MovingSphere(vec3 cen0, vec3 cen1, float t0, float t1, float r, shared_ptr<Material> m)
+        : Hitable(m), center0(cen0), center1(cen1), time0(t0), time1(t1), radius(r){};
 
     vec3 get_center(float ti) const { return center0 + (center1 - center0) * (ti - time0) / (time1 - time0); }
     inline virtual bool hit(const Ray &r, float tmin, float tmax, Hit &rec) const override;
@@ -44,7 +43,6 @@ class MovingSphere : public Hitable
     vec3 center1;
     float time0, time1;
     float radius;
-    Material *material_p;
 };
 
 inline bool Sphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const

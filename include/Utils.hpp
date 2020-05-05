@@ -1,7 +1,11 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 #include "vec3.hpp"
+
 #include <random>
+#include <memory>
+using std::shared_ptr;
+using std::make_shared;
 
 #define MAX_DEPTH 50
 
@@ -15,7 +19,7 @@ class Hitable;
         world——物体，是一个Hitable list
         depth——递归深度
  ******************************/
-vec3 color(const Ray &r, Hitable *world, int depth);
+vec3 color(const Ray &r, shared_ptr<Hitable>world, int depth);
 
 /******************************
  反射的关键函数
@@ -54,7 +58,7 @@ float get_rand();
 
 vec3 random_in_unit_sphere();
 
-Hitable *generate_scene();
+shared_ptr<Hitable> generate_scene();
 
 float ffmin(float a, float b);
 float ffmax(float a, float b);

@@ -26,7 +26,8 @@ int main()
     // list[3] = new Sphere(vec3(-1, 0, -1), 0.5, new Dielectric(1.5));
     // list[4] = new Sphere(vec3(-1, 0, -1), -0.45, new Dielectric(1.5));
     // Hitable *world = new HitableList(list, 5);
-    Hitable *world = generate_scene();
+    shared_ptr<Hitable> world;
+    world = generate_scene();
     for (int j = ny - 1; j >= 0; --j)
         for (int i = 0; i < nx; ++i)
         {

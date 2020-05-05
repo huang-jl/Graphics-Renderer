@@ -4,6 +4,7 @@
 #include "HitableList.hpp"
 #include "Material.hpp"
 #include "Sphere.hpp"
+#include <vector>
 
 float ffmin(float a, float b) { return (a < b) ? a : b; }
 float ffmax(float a, float b) { return (a < b) ? b : a; }
@@ -14,7 +15,7 @@ float ffmax(float a, float b) { return (a < b) ? b : a; }
         world——物体，是一个Hitable list
         depth——递归深度
  ******************************/
-vec3 color(const Ray &r, Hitable *world, int depth)
+vec3 color(const Ray &r, shared_ptr<Hitable> world, int depth)
 {
     Hit rec;
     if (world->hit(r, 0.001, MAXFLOAT, rec))
@@ -37,12 +38,12 @@ vec3 color(const Ray &r, Hitable *world, int depth)
     return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
 }
 
-Hitable *generate_scene()
+shared_ptr<Hitable> generate_scene()
 {
-    int n = 500;
-    int num = 0;
-    Hitable **list = new Hitable *[n + 1];
-    list[num++] = new Sphere(vec3(0, -1000, 0), 1000, new Lambertian(vec3(0.5, 0.5, 0.5)));
+    // int n = 500;
+    // int num = 0;
+    std::vector<shared_ptr<Hitable>> list;
+    list.push_back(make_shared<Sphere>(vec3(0, -1000, 0), 1000, make_shared<Lambertian>(vec3(0.5, 0.5, 0.5))));
     for (int i = -11; i < 11; ++i)
         for (int j = -11; j < 11; ++j)
         {
@@ -51,22 +52,23 @@ Hitable *generate_scene()
             if ((center - vec3(4, 0.2, 0)).length() < 0.9)
                 continue;
             if (choosed < 0.8)
-                list[num++] = new MovingSphere(
+                list.push_back(make_shared<MovingSphere>(
                     center, center + vec3(0, 0.5 * get_rand(), 0.0), 0, 1, 0.2,
-                    new Lambertian(vec3(get_rand() * get_rand(), get_rand() * get_rand(), get_rand() * get_rand())));
+                                     make_shared<Lambertian>(vec3(get_rand() * get_rand(), get_rand() * get_rand(),
+                                                                     get_rand() * get_rand()))));
             else if (choosed < 0.95)
-                list[num++] =
-                    new Sphere(center, 0.2,
-                               new Metal(vec3(0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1)),
-                                         0.5 * get_rand()));
+                list.push_back(make_shared<Sphere>(
+                    center, 0.2,
+                    make_shared<Metal>(vec3(0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1)),
+                                          0.5 * get_rand())));
             else
-                list[num++] = new Sphere(center, 0.2, new Dielectric(1.5));
+                list.push_back(make_shared<Sphere>(center, 0.2, make_shared<Dielectric>(1.5)));
         }
-    list[num++] = new Sphere(vec3(0, 1, 0), 1.0, new Dielectric(1.5));
-    list[num++] = new Sphere(vec3(-4, 1, 0), 1.0, new Lambertian(vec3(0.4, 0.2, 0.1)));
-    list[num++] = new Sphere(vec3(4, 1, 0), 1.0, new Metal(vec3(0.7, 0.6, 0.5), 0.0));
+    list.push_back(make_shared<Sphere>(vec3(0, 1, 0), 1.0, make_shared<Dielectric>(1.5)));
+    list.push_back(make_shared<Sphere>(vec3(-4, 1, 0), 1.0, make_shared<Lambertian>(vec3(0.4, 0.2, 0.1))));
+    list.push_back(make_shared<Sphere>(vec3(4, 1, 0), 1.0, make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0)));
+    return make_shared<BVHNode>(list, 0, list.size(), 0, 1);
     // return new HitableList(list, num);
-    return new BHVNode(list, num, 0.0, 1.0);
 }
 
 /******************************
@@ -146,4 +148,3 @@ vec3 random_in_unit_sphere()
     } while (point.squared_length() > 1);
     return point;
 }
-
