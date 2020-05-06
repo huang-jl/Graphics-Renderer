@@ -59,6 +59,7 @@ float get_rand();
 vec3 random_in_unit_sphere();
 
 shared_ptr<Hitable> generate_scene();
+shared_ptr<Hitable> two_sphere();
 
 float ffmin(float a, float b);
 float ffmax(float a, float b);

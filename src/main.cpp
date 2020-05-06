@@ -18,7 +18,7 @@ int main()
     vec3 look_at = vec3(0, 0, 0);
     float focus_d = 10;
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
-    Camera camera(look_from, look_at, vec3(0, 1, 0), 20, aspect, 0.2, focus_d, 0, 1);
+    Camera camera(look_from, look_at, vec3(0, 1, 0), 20, aspect, 0.0, focus_d, 0, 1);
     // Hitable *list[5];
     // list[0] = new Sphere(vec3(0, 0, -1), 0.5, new Lambertian(vec3(0.1, 0.2, 0.5)));
     // list[1] = new Sphere(vec3(0, -100.5, -1), 100, new Lambertian(vec3(0.8, 0.8, 0.0)));
@@ -26,8 +26,8 @@ int main()
     // list[3] = new Sphere(vec3(-1, 0, -1), 0.5, new Dielectric(1.5));
     // list[4] = new Sphere(vec3(-1, 0, -1), -0.45, new Dielectric(1.5));
     // Hitable *world = new HitableList(list, 5);
-    shared_ptr<Hitable> world;
-    world = generate_scene();
+    shared_ptr<Hitable> world = two_sphere();
+    // world = generate_scene();
     for (int j = ny - 1; j >= 0; --j)
         for (int i = 0; i < nx; ++i)
         {

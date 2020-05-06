@@ -1,0 +1,10 @@
+CMakeFils/
+cmake*
+CMake*
+output*
+main
+bin/
+!CMakeLists.txt
+\.DS_Store
+\.vscode/
+introduction.cpp

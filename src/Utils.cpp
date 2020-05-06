@@ -4,7 +4,9 @@
 #include "HitableList.hpp"
 #include "Material.hpp"
 #include "Sphere.hpp"
+#include "Texture.hpp"
 #include <vector>
+#include <ctime>
 
 float ffmin(float a, float b) { return (a < b) ? a : b; }
 float ffmax(float a, float b) { return (a < b) ? b : a; }
@@ -12,12 +14,13 @@ float ffmax(float a, float b) { return (a < b) ? b : a; }
  光线追踪的关键函数
     input:
         r——待求交的光线
-        world——物体，是一个Hitable list
+        world——物体，是一个Hitable
         depth——递归深度
  ******************************/
 vec3 color(const Ray &r, shared_ptr<Hitable> world, int depth)
 {
     Hit rec;
+    //当交点处的t<0.001的时候，认为不相交，从而能绘出阴影的效果
     if (world->hit(r, 0.001, MAXFLOAT, rec))
     {
         //根据法向量构建颜色，最后的图像颜色和法向量有关(x,y,z)<=>(r,g,b)
@@ -40,10 +43,9 @@ vec3 color(const Ray &r, shared_ptr<Hitable> world, int depth)
 
 shared_ptr<Hitable> generate_scene()
 {
-    // int n = 500;
-    // int num = 0;
     std::vector<shared_ptr<Hitable>> list;
-    list.push_back(make_shared<Sphere>(vec3(0, -1000, 0), 1000, make_shared<Lambertian>(vec3(0.5, 0.5, 0.5))));
+    auto checker_texture = make_shared<CheckerTexture>(make_shared<ConstantTexture>(vec3(0.2,0.3,0.1)), make_shared<ConstantTexture>(vec3(0.9,0.9,0.9)));
+    list.push_back(make_shared<Sphere>(vec3(0, -1000, 0), 1000, make_shared<Lambertian>(checker_texture)));
     for (int i = -11; i < 11; ++i)
         for (int j = -11; j < 11; ++j)
         {
@@ -69,6 +71,17 @@ shared_ptr<Hitable> generate_scene()
     list.push_back(make_shared<Sphere>(vec3(4, 1, 0), 1.0, make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0)));
     return make_shared<BVHNode>(list, 0, list.size(), 0, 1);
     // return new HitableList(list, num);
+}
+
+shared_ptr<Hitable> two_sphere()
+{
+    //auto checker_texture = make_shared<CheckerTexture>(make_shared<ConstantTexture>(vec3(0.2,0.3,0.1)), make_shared<ConstantTexture>(vec3(0.9,0.9,0.9)));
+    shared_ptr<Texture>noise_texture = make_shared<NoiseTexture>(3);
+    std::vector<shared_ptr<Hitable>>list;
+    shared_ptr<Hitable>s1 = make_shared<Sphere>(vec3(0,-1000,0),1000,make_shared<Lambertian>(noise_texture));
+    shared_ptr<Hitable>s2 = make_shared<Sphere>(vec3(0,2,0),2,make_shared<Lambertian>(noise_texture));
+    list.push_back(s1);list.push_back(s2);
+    return make_shared<HitableList>(list);
 }
 
 /******************************
@@ -134,7 +147,7 @@ float schlick(float cosine, float ref_idx)
 
 float get_rand()
 {
-    static std::default_random_engine engine;
+    static std::default_random_engine engine(time(NULL));
     static std::uniform_real_distribution<float> dis(0.0, 1.0);
     return dis(engine);
 }

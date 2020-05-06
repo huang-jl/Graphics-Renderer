@@ -3,6 +3,7 @@
 
 #include "Hitable.hpp"
 #include "Ray.hpp"
+#include "Texture.hpp"
 #include "Utils.hpp"
 
 /*
@@ -24,17 +25,23 @@ class Lambertian : public Material
      * 连接交点和target为随机产生的光线
      */
   public:
-    Lambertian(const vec3 &a) : albedo(a) {}
+    Lambertian(shared_ptr<Texture> a) : albedo(a) {}
+    Lambertian(vec3 a)
+    {
+        shared_ptr<Texture> texture = make_shared<ConstantTexture>(a);
+        albedo = texture;
+    }
     virtual bool scatter(const Ray &r_in, const Hit &rec, vec3 &attenuation, Ray &scattered) const
     {
         vec3 target = rec.p + rec.normal + random_in_unit_sphere();
         scattered = Ray(rec.p, target - rec.p, r_in.time());
-        attenuation = albedo;
+        attenuation = albedo->value(0, 0, rec.p);
         return true;
     }
 
     /*data*/
-    vec3 albedo; //反射率
+    // vec3 albedo; //反射率
+    shared_ptr<Texture> albedo;
 };
 
 class Metal : public Material
