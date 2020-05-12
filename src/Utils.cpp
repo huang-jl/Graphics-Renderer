@@ -2,14 +2,19 @@
 #include "BVH.hpp"
 #include "Hitable.hpp"
 #include "HitableList.hpp"
+#include "Light.hpp"
 #include "Material.hpp"
+#include "Rect.hpp"
 #include "Sphere.hpp"
 #include "Texture.hpp"
-#include <vector>
+#include "Box.hpp"
 #include <ctime>
+#include <vector>
 
 float ffmin(float a, float b) { return (a < b) ? a : b; }
 float ffmax(float a, float b) { return (a < b) ? b : a; }
+int imin(int a, int b) { return (a < b) ? a : b; }
+int imax(int a, int b) { return (a > b) ? a : b; }
 /******************************
  光线追踪的关键函数
     input:
@@ -29,22 +34,25 @@ vec3 color(const Ray &r, shared_ptr<Hitable> world, int depth)
         //这里的attenuation是反射的系数，它会吸收相应的光线能量
         Ray reflect_r;
         vec3 attenuation;
+        vec3 emitted = rec.material_p->emitted(rec.u, rec.v, rec.p);
         if (depth < MAX_DEPTH && rec.material_p->scatter(r, rec, attenuation, reflect_r))
-            return attenuation * color(reflect_r, world, depth + 1);
+            return emitted + attenuation * color(reflect_r, world, depth + 1);
         else
-            return vec3(0, 0, 0);
+            return emitted;
         // return 0.5 * vec3(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
     }
     // else
-    vec3 unit_direction = unit_vector(r.direction());
-    float t = 0.5 * (unit_direction.y() + 1.0);
-    return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+    // vec3 unit_direction = unit_vector(r.direction());
+    // float t = 0.5 * (unit_direction.y() + 1.0);
+    // return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+    return vec3(0, 0, 0); //纯黑背景
 }
 
 shared_ptr<Hitable> generate_scene()
 {
     std::vector<shared_ptr<Hitable>> list;
-    auto checker_texture = make_shared<CheckerTexture>(make_shared<ConstantTexture>(vec3(0.2,0.3,0.1)), make_shared<ConstantTexture>(vec3(0.9,0.9,0.9)));
+    auto checker_texture = make_shared<CheckerTexture>(make_shared<ConstantTexture>(vec3(0.2, 0.3, 0.1)),
+                                                       make_shared<ConstantTexture>(vec3(0.9, 0.9, 0.9)));
     list.push_back(make_shared<Sphere>(vec3(0, -1000, 0), 1000, make_shared<Lambertian>(checker_texture)));
     for (int i = -11; i < 11; ++i)
         for (int j = -11; j < 11; ++j)
@@ -56,13 +64,13 @@ shared_ptr<Hitable> generate_scene()
             if (choosed < 0.8)
                 list.push_back(make_shared<MovingSphere>(
                     center, center + vec3(0, 0.5 * get_rand(), 0.0), 0, 1, 0.2,
-                                     make_shared<Lambertian>(vec3(get_rand() * get_rand(), get_rand() * get_rand(),
-                                                                     get_rand() * get_rand()))));
+                    make_shared<Lambertian>(
+                        vec3(get_rand() * get_rand(), get_rand() * get_rand(), get_rand() * get_rand()))));
             else if (choosed < 0.95)
                 list.push_back(make_shared<Sphere>(
                     center, 0.2,
                     make_shared<Metal>(vec3(0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1)),
-                                          0.5 * get_rand())));
+                                       0.5 * get_rand())));
             else
                 list.push_back(make_shared<Sphere>(center, 0.2, make_shared<Dielectric>(1.5)));
         }
@@ -75,12 +83,49 @@ shared_ptr<Hitable> generate_scene()
 
 shared_ptr<Hitable> two_sphere()
 {
-    //auto checker_texture = make_shared<CheckerTexture>(make_shared<ConstantTexture>(vec3(0.2,0.3,0.1)), make_shared<ConstantTexture>(vec3(0.9,0.9,0.9)));
-    shared_ptr<Texture>noise_texture = make_shared<NoiseTexture>(3);
-    std::vector<shared_ptr<Hitable>>list;
-    shared_ptr<Hitable>s1 = make_shared<Sphere>(vec3(0,-1000,0),1000,make_shared<Lambertian>(noise_texture));
-    shared_ptr<Hitable>s2 = make_shared<Sphere>(vec3(0,2,0),2,make_shared<Lambertian>(noise_texture));
-    list.push_back(s1);list.push_back(s2);
+    // auto checker_texture = make_shared<CheckerTexture>(make_shared<ConstantTexture>(vec3(0.2,0.3,0.1)),
+    // make_shared<ConstantTexture>(vec3(0.9,0.9,0.9)));
+    shared_ptr<Texture> noise_texture = make_shared<NoiseTexture>(3);
+    std::vector<shared_ptr<Hitable>> list;
+    shared_ptr<Hitable> s1 = make_shared<Sphere>(vec3(0, -1000, 0), 1000, make_shared<Lambertian>(noise_texture));
+    shared_ptr<Hitable> s2 = make_shared<Sphere>(vec3(0, 2, 0), 2, make_shared<Lambertian>(noise_texture));
+    list.push_back(s1);
+    list.push_back(s2);
+    return make_shared<HitableList>(list);
+}
+
+shared_ptr<Hitable> simple_light() //测试光源
+{
+    std::vector<shared_ptr<Hitable>> list;
+    shared_ptr<Texture> noise_texture = make_shared<NoiseTexture>(3);
+    auto s1 = make_shared<Sphere>(vec3(0, -1000, 0), 1000, make_shared<Lambertian>(noise_texture));
+    auto s2 = make_shared<Sphere>(vec3(0, 2, 0), 2, make_shared<Lambertian>(noise_texture));
+    auto s3 =
+        make_shared<Sphere>(vec3(0, 7, 0), 2, make_shared<DiffuseLight>(make_shared<ConstantTexture>(vec3(4, 4, 4))));
+    auto s4 =
+        make_shared<XYRect>(3, 5, 1, 3, -2, make_shared<DiffuseLight>(make_shared<ConstantTexture>(vec3(4, 4, 4))));
+    list.push_back(s1);
+    list.push_back(s2);
+    list.push_back(s3);
+    list.push_back(s4);
+    return make_shared<HitableList>(list);
+}
+
+shared_ptr<Hitable> cornell_box() // cornell box测试场景
+{
+    std::vector<shared_ptr<Hitable>> list;
+    shared_ptr<Material> red = make_shared<Lambertian>(vec3(0.65, 0.05, 0.05));
+    shared_ptr<Material> white = make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
+    shared_ptr<Material> green = make_shared<Lambertian>(vec3(0.12, 0.45, 0.15));
+    shared_ptr<Material> light = make_shared<DiffuseLight>(vec3(15, 15, 15));
+    list.push_back(make_shared<YZRect>(0, 555, 0, 555, 555, green));
+    list.push_back(make_shared<YZRect>(0, 555, 0, 555, 0, red));
+    list.push_back(make_shared<XZRect>(213, 343, 227, 322, 554, light));
+    list.push_back(make_shared<XZRect>(0, 555, 0, 555, 0, white));
+    list.push_back(make_shared<XYRect>(0, 555, 0, 555, 555, white));
+    list.push_back(make_shared<XZRect>(0, 555, 0, 555, 555, white));
+    list.push_back(make_shared<Box>(vec3(130,0,65),vec3(295,165,230),white));
+    list.push_back(make_shared<Box>(vec3(265,0,295),vec3(430,330,460),white));
     return make_shared<HitableList>(list);
 }
 

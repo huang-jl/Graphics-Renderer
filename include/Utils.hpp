@@ -59,8 +59,12 @@ float get_rand();
 vec3 random_in_unit_sphere();
 
 shared_ptr<Hitable> generate_scene();
-shared_ptr<Hitable> two_sphere();
+shared_ptr<Hitable> two_sphere();//测试纹理
+shared_ptr<Hitable> simple_light();//测试光源
+shared_ptr<Hitable> cornell_box();  //cornell box测试厂家
 
 float ffmin(float a, float b);
 float ffmax(float a, float b);
+int imin(int a,int b);
+int imax(int a,int b);
 #endif

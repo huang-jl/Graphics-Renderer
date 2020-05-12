@@ -8,7 +8,7 @@ class HitableList : public Hitable
 {
   public:
     HitableList() {}
-    HitableList(std::vector<shared_ptr<Hitable>>& l) : list(l) {}
+    HitableList(std::vector<shared_ptr<Hitable>> &l) : list(l) {}
     virtual bool hit(const Ray &r, float tmin, float tmax, Hit &rec) const override
     {
         Hit temp_rec;
@@ -46,6 +46,7 @@ class HitableList : public Hitable
         }
         return true;
     }
+    void add_hitable(shared_ptr<Hitable> object) { list.push_back(object); }
     /*data*/
     std::vector<shared_ptr<Hitable>> list;
 };

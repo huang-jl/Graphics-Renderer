@@ -30,7 +30,8 @@ class Camera
         vertical = vec3(0.0, 2.0, 0.0);
         origin = vec3(0.0, 0.0, 0.0);
     }
-    /* vfov代表图片高的视角，调用的时候使用角度制
+    /* 
+     * vfov代表图片高的视角，调用的时候使用角度制
      * aspect代表width / height
      * lens_radius表示透镜的半径
      * focus_dist表示透镜到投影平面的距离
@@ -46,6 +47,7 @@ class Camera
         float half_width = half_height * aspect;
         lens_radius = aperture / 2.0;
         origin = look_from;
+        //相机平面在真实空间中的三个方向
         w = unit_vector(look_at - look_from);
         u = unit_vector(cross(w, vup));
         v = unit_vector(cross(u, w));

@@ -20,9 +20,14 @@ SET(PT_INCLUDE
     include/Sphere.hpp
     include/Camera.hpp
     include/Material.hpp
-    include/BVH.hpp)
+    include/BVH.hpp
+    include/Texture.hpp
+    include/Perlin.hpp
+    include/Light.hpp)
 
 SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_FLAGS "-std=c++11 -O2 ${CMAKE_CXX_FLAGS}")
+MESSAGE(STATUS ${CMAKE_CXX_FLAGS})
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${PT_SOURCE} ${PT_INCLUDE})

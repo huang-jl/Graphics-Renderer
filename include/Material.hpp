@@ -9,12 +9,15 @@
 /*
  * 为了支持运动模糊，注意散射光线的时刻和入射光线一致
  */
+
 class Material
 {
   public:
     // input:输入光线、交点信息
     // output:(r,g,b)的衰减量，散射光线
     virtual bool scatter(const Ray &r_in, const Hit &rec, vec3 &attenuation, Ray &scattered) const = 0;
+    //光源材质需要重写的虚函数，默认材质是不带任何颜色的
+    virtual vec3 emitted(float u, float v, vec3 &p) const { return vec3(0, 0, 0); }
 };
 
 class Lambertian : public Material
@@ -26,16 +29,12 @@ class Lambertian : public Material
      */
   public:
     Lambertian(shared_ptr<Texture> a) : albedo(a) {}
-    Lambertian(vec3 a)
-    {
-        shared_ptr<Texture> texture = make_shared<ConstantTexture>(a);
-        albedo = texture;
-    }
+    Lambertian(vec3 a) { albedo = make_shared<ConstantTexture>(a); }
     virtual bool scatter(const Ray &r_in, const Hit &rec, vec3 &attenuation, Ray &scattered) const
     {
         vec3 target = rec.p + rec.normal + random_in_unit_sphere();
         scattered = Ray(rec.p, target - rec.p, r_in.time());
-        attenuation = albedo->value(0, 0, rec.p);
+        attenuation = albedo->value(rec.u, rec.v, rec.p);
         return true;
     }
 

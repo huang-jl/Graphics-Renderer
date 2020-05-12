@@ -1,8 +1,8 @@
 #ifndef HITABLE_HPP
 #define HITABLE_HPP
 
-#include "Ray.hpp"
 #include "AABB.hpp"
+#include "Ray.hpp"
 
 class Material;
 struct Hit
@@ -10,6 +10,7 @@ struct Hit
     float t;
     vec3 p;
     vec3 normal; // unit
+    float u, v; //击中点的u,v信息
     shared_ptr<Material> material_p;
 };
 
