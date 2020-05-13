@@ -1,5 +1,6 @@
 #include "Utils.hpp"
 #include "BVH.hpp"
+#include "Box.hpp"
 #include "Hitable.hpp"
 #include "HitableList.hpp"
 #include "Light.hpp"
@@ -7,7 +8,7 @@
 #include "Rect.hpp"
 #include "Sphere.hpp"
 #include "Texture.hpp"
-#include "Box.hpp"
+#include "Transform.hpp"
 #include <ctime>
 #include <vector>
 
@@ -22,7 +23,7 @@ int imax(int a, int b) { return (a > b) ? a : b; }
         world——物体，是一个Hitable
         depth——递归深度
  ******************************/
-vec3 color(const Ray &r, shared_ptr<Hitable> world, int depth)
+Vector3f color(const Ray &r, shared_ptr<Hitable> world, int depth)
 {
     Hit rec;
     //当交点处的t<0.001的时候，认为不相交，从而能绘出阴影的效果
@@ -33,62 +34,62 @@ vec3 color(const Ray &r, shared_ptr<Hitable> world, int depth)
         //有散射的物体本身没有颜色，它的颜色通过其之后的光线射中的位置确定
         //这里的attenuation是反射的系数，它会吸收相应的光线能量
         Ray reflect_r;
-        vec3 attenuation;
-        vec3 emitted = rec.material_p->emitted(rec.u, rec.v, rec.p);
+        Vector3f attenuation;
+        Vector3f emitted = rec.material_p->emitted(rec.u, rec.v, rec.p);
         if (depth < MAX_DEPTH && rec.material_p->scatter(r, rec, attenuation, reflect_r))
             return emitted + attenuation * color(reflect_r, world, depth + 1);
         else
             return emitted;
-        // return 0.5 * vec3(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
+        // return 0.5 * Vector3f(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
     }
     // else
-    // vec3 unit_direction = unit_vector(r.direction());
+    // Vector3f unit_direction = (r.direction());
     // float t = 0.5 * (unit_direction.y() + 1.0);
-    // return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
-    return vec3(0, 0, 0); //纯黑背景
+    // return (1.0 - t) * Vector3f(1.0, 1.0, 1.0) + t * Vector3f(0.5, 0.7, 1.0);
+    return Vector3f(0, 0, 0); //纯黑背景
 }
 
 shared_ptr<Hitable> generate_scene()
 {
     std::vector<shared_ptr<Hitable>> list;
-    auto checker_texture = make_shared<CheckerTexture>(make_shared<ConstantTexture>(vec3(0.2, 0.3, 0.1)),
-                                                       make_shared<ConstantTexture>(vec3(0.9, 0.9, 0.9)));
-    list.push_back(make_shared<Sphere>(vec3(0, -1000, 0), 1000, make_shared<Lambertian>(checker_texture)));
+    auto checker_texture = make_shared<CheckerTexture>(make_shared<ConstantTexture>(Vector3f(0.2, 0.3, 0.1)),
+                                                       make_shared<ConstantTexture>(Vector3f(0.9, 0.9, 0.9)));
+    list.push_back(make_shared<Sphere>(Vector3f(0, -1000, 0), 1000, make_shared<Lambertian>(checker_texture)));
     for (int i = -11; i < 11; ++i)
         for (int j = -11; j < 11; ++j)
         {
             float choosed = get_rand();
-            vec3 center(i + 0.9 * get_rand(), 0.2, j + 0.9 * get_rand());
-            if ((center - vec3(4, 0.2, 0)).length() < 0.9)
+            Vector3f center(i + 0.9 * get_rand(), 0.2, j + 0.9 * get_rand());
+            if ((center - Vector3f(4, 0.2, 0)).length() < 0.9)
                 continue;
             if (choosed < 0.8)
                 list.push_back(make_shared<MovingSphere>(
-                    center, center + vec3(0, 0.5 * get_rand(), 0.0), 0, 1, 0.2,
+                    center, center + Vector3f(0, 0.5 * get_rand(), 0.0), 0, 1, 0.2,
                     make_shared<Lambertian>(
-                        vec3(get_rand() * get_rand(), get_rand() * get_rand(), get_rand() * get_rand()))));
+                        Vector3f(get_rand() * get_rand(), get_rand() * get_rand(), get_rand() * get_rand()))));
             else if (choosed < 0.95)
                 list.push_back(make_shared<Sphere>(
                     center, 0.2,
-                    make_shared<Metal>(vec3(0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1)),
+                    make_shared<Metal>(Vector3f(0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1)),
                                        0.5 * get_rand())));
             else
                 list.push_back(make_shared<Sphere>(center, 0.2, make_shared<Dielectric>(1.5)));
         }
-    list.push_back(make_shared<Sphere>(vec3(0, 1, 0), 1.0, make_shared<Dielectric>(1.5)));
-    list.push_back(make_shared<Sphere>(vec3(-4, 1, 0), 1.0, make_shared<Lambertian>(vec3(0.4, 0.2, 0.1))));
-    list.push_back(make_shared<Sphere>(vec3(4, 1, 0), 1.0, make_shared<Metal>(vec3(0.7, 0.6, 0.5), 0.0)));
+    list.push_back(make_shared<Sphere>(Vector3f(0, 1, 0), 1.0, make_shared<Dielectric>(1.5)));
+    list.push_back(make_shared<Sphere>(Vector3f(-4, 1, 0), 1.0, make_shared<Lambertian>(Vector3f(0.4, 0.2, 0.1))));
+    list.push_back(make_shared<Sphere>(Vector3f(4, 1, 0), 1.0, make_shared<Metal>(Vector3f(0.7, 0.6, 0.5), 0.0)));
     return make_shared<BVHNode>(list, 0, list.size(), 0, 1);
     // return new HitableList(list, num);
 }
 
 shared_ptr<Hitable> two_sphere()
 {
-    // auto checker_texture = make_shared<CheckerTexture>(make_shared<ConstantTexture>(vec3(0.2,0.3,0.1)),
-    // make_shared<ConstantTexture>(vec3(0.9,0.9,0.9)));
+    // auto checker_texture = make_shared<CheckerTexture>(make_shared<ConstantTexture>(Vector3f(0.2,0.3,0.1)),
+    // make_shared<ConstantTexture>(Vector3f(0.9,0.9,0.9)));
     shared_ptr<Texture> noise_texture = make_shared<NoiseTexture>(3);
     std::vector<shared_ptr<Hitable>> list;
-    shared_ptr<Hitable> s1 = make_shared<Sphere>(vec3(0, -1000, 0), 1000, make_shared<Lambertian>(noise_texture));
-    shared_ptr<Hitable> s2 = make_shared<Sphere>(vec3(0, 2, 0), 2, make_shared<Lambertian>(noise_texture));
+    shared_ptr<Hitable> s1 = make_shared<Sphere>(Vector3f(0, -1000, 0), 1000, make_shared<Lambertian>(noise_texture));
+    shared_ptr<Hitable> s2 = make_shared<Sphere>(Vector3f(0, 2, 0), 2, make_shared<Lambertian>(noise_texture));
     list.push_back(s1);
     list.push_back(s2);
     return make_shared<HitableList>(list);
@@ -98,12 +99,12 @@ shared_ptr<Hitable> simple_light() //测试光源
 {
     std::vector<shared_ptr<Hitable>> list;
     shared_ptr<Texture> noise_texture = make_shared<NoiseTexture>(3);
-    auto s1 = make_shared<Sphere>(vec3(0, -1000, 0), 1000, make_shared<Lambertian>(noise_texture));
-    auto s2 = make_shared<Sphere>(vec3(0, 2, 0), 2, make_shared<Lambertian>(noise_texture));
-    auto s3 =
-        make_shared<Sphere>(vec3(0, 7, 0), 2, make_shared<DiffuseLight>(make_shared<ConstantTexture>(vec3(4, 4, 4))));
+    auto s1 = make_shared<Sphere>(Vector3f(0, -1000, 0), 1000, make_shared<Lambertian>(noise_texture));
+    auto s2 = make_shared<Sphere>(Vector3f(0, 2, 0), 2, make_shared<Lambertian>(noise_texture));
+    auto s3 = make_shared<Sphere>(Vector3f(0, 7, 0), 2,
+                                  make_shared<DiffuseLight>(make_shared<ConstantTexture>(Vector3f(4, 4, 4))));
     auto s4 =
-        make_shared<XYRect>(3, 5, 1, 3, -2, make_shared<DiffuseLight>(make_shared<ConstantTexture>(vec3(4, 4, 4))));
+        make_shared<XYRect>(3, 5, 1, 3, -2, make_shared<DiffuseLight>(make_shared<ConstantTexture>(Vector3f(4, 4, 4))));
     list.push_back(s1);
     list.push_back(s2);
     list.push_back(s3);
@@ -114,18 +115,24 @@ shared_ptr<Hitable> simple_light() //测试光源
 shared_ptr<Hitable> cornell_box() // cornell box测试场景
 {
     std::vector<shared_ptr<Hitable>> list;
-    shared_ptr<Material> red = make_shared<Lambertian>(vec3(0.65, 0.05, 0.05));
-    shared_ptr<Material> white = make_shared<Lambertian>(vec3(0.73, 0.73, 0.73));
-    shared_ptr<Material> green = make_shared<Lambertian>(vec3(0.12, 0.45, 0.15));
-    shared_ptr<Material> light = make_shared<DiffuseLight>(vec3(15, 15, 15));
+    shared_ptr<Material> red = make_shared<Lambertian>(Vector3f(0.65, 0.05, 0.05));
+    shared_ptr<Material> white = make_shared<Lambertian>(Vector3f(0.73, 0.73, 0.73));
+    shared_ptr<Material> green = make_shared<Lambertian>(Vector3f(0.12, 0.45, 0.15));
+    shared_ptr<Material> light = make_shared<DiffuseLight>(Vector3f(15, 15, 15));
+    shared_ptr<Hitable> box_1 = make_shared<Translate>(
+        make_shared<Rotate>(make_shared<Box>(Vector3f(0, 0, 0), Vector3f(165, 165, 165), white), 40, 1),
+        Vector3f(130, 0, 65));
+    shared_ptr<Hitable> box_2 = make_shared<Translate>(
+        make_shared<Rotate>(make_shared<Box>(Vector3f(0, 0, 0), Vector3f(165, 330, 165), white), -35, 1),
+        Vector3f(265, 0, 295));
     list.push_back(make_shared<YZRect>(0, 555, 0, 555, 555, green));
     list.push_back(make_shared<YZRect>(0, 555, 0, 555, 0, red));
     list.push_back(make_shared<XZRect>(213, 343, 227, 322, 554, light));
     list.push_back(make_shared<XZRect>(0, 555, 0, 555, 0, white));
     list.push_back(make_shared<XYRect>(0, 555, 0, 555, 555, white));
     list.push_back(make_shared<XZRect>(0, 555, 0, 555, 555, white));
-    list.push_back(make_shared<Box>(vec3(130,0,65),vec3(295,165,230),white));
-    list.push_back(make_shared<Box>(vec3(265,0,295),vec3(430,330,460),white));
+    list.push_back(box_1);
+    list.push_back(box_2);
     return make_shared<HitableList>(list);
 }
 
@@ -137,11 +144,11 @@ shared_ptr<Hitable> cornell_box() // cornell box测试场景
     return:
         反射光的方向
  ******************************/
-vec3 reflect(const vec3 &v, const vec3 &normal)
+Vector3f reflect(const Vector3f &v, const Vector3f &normal)
 {
     // v表示入射光线，normal表示交点法向量
-    // assert(dot(v, normal) < 0);
-    return v - 2 * dot(v, normal) * normal;
+    // assert(Vector3f::dot(v, normal) < 0);
+    return v - 2 * Vector3f::dot(v, normal) * normal;
 }
 
 /******************************
@@ -155,11 +162,11 @@ vec3 reflect(const vec3 &v, const vec3 &normal)
     return:
         是否能够折射
  ******************************/
-bool refract(const vec3 &v, const vec3 &normal, float n_relative, vec3 &refracted)
+bool refract(const Vector3f &v, const Vector3f &normal, float n_relative, Vector3f &refracted)
 {
-    vec3 unit_v = unit_vector(v);
+    Vector3f unit_v = v.normalized();
     //入射角为beta
-    float cos_beta = dot(unit_v, normal);
+    float cos_beta = Vector3f::dot(unit_v, normal);
     //折射角alpha，则discriminant = cos^2(alpha)
     float discriminant = 1.0 - n_relative * n_relative * (1 - cos_beta * cos_beta);
     if (discriminant > 0.0)
@@ -197,12 +204,17 @@ float get_rand()
     return dis(engine);
 }
 
-vec3 random_in_unit_sphere()
+Vector3f random_in_unit_sphere()
 {
-    vec3 point(0, 0, 0);
+    Vector3f point(0, 0, 0);
     do
     {
-        point = 2 * vec3(get_rand(), get_rand(), get_rand()) - vec3(1, 1, 1);
-    } while (point.squared_length() > 1);
+        point = 2 * Vector3f(get_rand(), get_rand(), get_rand()) - Vector3f(1, 1, 1);
+    } while (point.squaredLength() > 1);
     return point;
+}
+
+float degree_to_radius(float degree) //角度制转弧度制
+{
+    return degree * M_PI / 180;
 }

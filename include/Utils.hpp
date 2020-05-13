@@ -1,6 +1,6 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
-#include "vec3.hpp"
+#include <vecmath.h>
 
 #include <random>
 #include <memory>
@@ -19,7 +19,7 @@ class Hitable;
         world——物体，是一个Hitable list
         depth——递归深度
  ******************************/
-vec3 color(const Ray &r, shared_ptr<Hitable>world, int depth);
+Vector3f color(const Ray &r, shared_ptr<Hitable>world, int depth);
 
 /******************************
  反射的关键函数
@@ -29,7 +29,7 @@ vec3 color(const Ray &r, shared_ptr<Hitable>world, int depth);
     return:
         反射光的方向
  ******************************/
-vec3 reflect(const vec3 &v, const vec3 &normal);
+Vector3f reflect(const Vector3f &v, const Vector3f &normal);
 
 /******************************
  折射的关键函数
@@ -42,7 +42,7 @@ vec3 reflect(const vec3 &v, const vec3 &normal);
     return:
         是否能够折射
  ******************************/
-bool refract(const vec3 &v, const vec3 &normal, float n_relative, vec3 &refracted);
+bool refract(const Vector3f &v, const Vector3f &normal, float n_relative, Vector3f &refracted);
 
 /******************************
  反射比计算函数
@@ -56,13 +56,14 @@ float schlick(float cosine, float ref_idx);
 
 float get_rand();
 
-vec3 random_in_unit_sphere();
+Vector3f random_in_unit_sphere();
 
 shared_ptr<Hitable> generate_scene();
 shared_ptr<Hitable> two_sphere();//测试纹理
 shared_ptr<Hitable> simple_light();//测试光源
 shared_ptr<Hitable> cornell_box();  //cornell box测试厂家
 
+float degree_to_radius(float degree);//角度制转弧度制
 float ffmin(float a, float b);
 float ffmax(float a, float b);
 int imin(int a,int b);

@@ -5,7 +5,7 @@
 #include <cmath>
 /*
  * 柏林噪声
- * 采用hash的方式，对一个点vec3&p返回一个float
+ * 采用hash的方式，对一个点Vector3f&p返回一个float
  * 需要明确，柏林噪声应该让相邻位置的颜色尽可能比较接近
  * 为了使返回值更平滑，我们采用线性差值的方法
  *
@@ -24,7 +24,7 @@
  * 为了避免最大值和最小值出现在整数点上，导致出现类似网格的样式
  * 采用了一个权重向量来点乘上随机向量，使纹理更加平滑·
  */
-inline float linear_interpolation(vec3 value[2][2][2], float u, float v, float w)
+inline float linear_interpolation(Vector3f value[2][2][2], float u, float v, float w)
 {
     float accum = 0.0;
     auto hermite_cube = [](float x) { return x * x * (3 - 2 * x); };
@@ -35,9 +35,9 @@ inline float linear_interpolation(vec3 value[2][2][2], float u, float v, float w
         for (int j = 0; j < 2; ++j)
             for (int k = 0; k < 2; ++k)
             {
-                vec3 weight_vector = vec3(u - i, v - j, w - k);
+                Vector3f weight_vector = Vector3f(u - i, v - j, w - k);
                 accum += (i * uu + (1 - i) * (1 - uu)) * (j * vv + (1 - j) * (1 - vv)) * (k * ww + (1 - k) * (1 - ww)) *
-                         dot(value[i][j][k], weight_vector);
+                         Vector3f::dot(value[i][j][k], weight_vector);
             }
     return accum;
 }
@@ -63,7 +63,7 @@ class Perlin
         delete[] perm_z;
     }
 
-    float noise(const vec3 &p) const
+    float noise(const Vector3f &p) const
     {
         float u = p.x() - floor(p.x());
         float v = p.y() - floor(p.y());
@@ -72,7 +72,7 @@ class Perlin
         int j = floor(p.y());
         int k = floor(p.z());
 
-        vec3 value[2][2][2];
+        Vector3f value[2][2][2];
         for (int di = 0; di < 2; ++di)
             for (int dj = 0; dj < 2; ++dj)
                 for (int dk = 0; dk < 2; ++dk)
@@ -89,10 +89,10 @@ class Perlin
      * 
      * 通常是间接使用
      */
-    float turb_noise(const vec3 &p, int mix_degree = 7) const
+    float turb_noise(const Vector3f &p, int mix_degree = 7) const
     {
         float accum = 0.0;
-        vec3 temp = p;
+        Vector3f temp = p;
         float weight = 1.0;
         for (int i = 0; i < mix_degree; ++i)
         {
@@ -106,16 +106,16 @@ class Perlin
   private:
     /*data*/
     static const int POINT_NUM = 256;
-    vec3 *ranfloat;
+    Vector3f *ranfloat;
     int *perm_x;
     int *perm_y;
     int *perm_z;
 
-    vec3 *perlin_generate()
+    Vector3f *perlin_generate()
     {
-        vec3 *rand_f = new vec3[POINT_NUM];
+        Vector3f *rand_f = new Vector3f[POINT_NUM];
         for (int i = 0; i < POINT_NUM; ++i)
-            rand_f[i] = unit_vector(2 * vec3(get_rand(), get_rand(), get_rand()) - vec3(1, 1, 1));
+            rand_f[i] = (2 * Vector3f(get_rand(), get_rand(), get_rand()) - Vector3f(1, 1, 1)).normalized();
         return rand_f;
     }
 

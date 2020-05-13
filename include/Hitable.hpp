@@ -8,8 +8,8 @@ class Material;
 struct Hit
 {
     float t;
-    vec3 p;
-    vec3 normal; // unit
+    Vector3f p;
+    Vector3f normal; // unit
     float u, v; //击中点的u,v信息
     shared_ptr<Material> material_p;
 };

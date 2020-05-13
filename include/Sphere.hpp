@@ -11,11 +11,11 @@ class Sphere : public Hitable
 {
   public:
     Sphere() {}
-    Sphere(vec3 cen, float r, shared_ptr<Material> m) : Hitable(m), center(cen), radius(r) {}
+    Sphere(Vector3f cen, float r, shared_ptr<Material> m) : Hitable(m), center(cen), radius(r) {}
     inline virtual bool hit(const Ray &r, float tmin, float tmax, Hit &rec) const override;
     inline virtual bool bounding_box(float t0, float t1, AABB &box) const override;
     /*data*/
-    vec3 center;
+    Vector3f center;
     float radius;
 };
 
@@ -32,15 +32,15 @@ class MovingSphere : public Hitable
      * 注意球在两个时刻之外仍然有运动，只是声明t0,t1用于计算
      * 因此不必和Camera中的快门开关时间匹配
      */
-    MovingSphere(vec3 cen0, vec3 cen1, float t0, float t1, float r, shared_ptr<Material> m)
+    MovingSphere(Vector3f cen0, Vector3f cen1, float t0, float t1, float r, shared_ptr<Material> m)
         : Hitable(m), center0(cen0), center1(cen1), time0(t0), time1(t1), radius(r){};
 
-    vec3 get_center(float ti) const { return center0 + (center1 - center0) * (ti - time0) / (time1 - time0); }
+    Vector3f get_center(float ti) const { return center0 + (center1 - center0) * (ti - time0) / (time1 - time0); }
     inline virtual bool hit(const Ray &r, float tmin, float tmax, Hit &rec) const override;
     inline virtual bool bounding_box(float t0, float t1, AABB &box) const override;
     /*data*/
-    vec3 center0;
-    vec3 center1;
+    Vector3f center0;
+    Vector3f center1;
     float time0, time1;
     float radius;
 };
@@ -48,10 +48,10 @@ class MovingSphere : public Hitable
 inline bool Sphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
 {
     //参略一些可以约去的2
-    vec3 oc = r.origin() - center; //球心到光线原点的向量
-    float a = dot(r.direction(), r.direction());
-    float b = dot(r.direction(), oc); // assert(b<0)
-    float c = dot(oc, oc) - radius * radius;
+    Vector3f oc = r.origin() - center; //球心到光线原点的向量
+    float a = Vector3f::dot(r.direction(), r.direction());
+    float b = Vector3f::dot(r.direction(), oc); // assert(b<0)
+    float c = Vector3f::dot(oc, oc) - radius * radius;
     float delta = b * b - a * c;
 
     if (delta > 0)
@@ -81,12 +81,12 @@ inline bool Sphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
 inline bool MovingSphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
 {
     //获得光线所在时刻球体的位置
-    vec3 center = get_center(r.time());
+    Vector3f center = get_center(r.time());
 
-    vec3 oc = r.origin() - center; //球心到光线原点的向量
-    float a = dot(r.direction(), r.direction());
-    float b = dot(r.direction(), oc); // assert(b<0)
-    float c = dot(oc, oc) - radius * radius;
+    Vector3f oc = r.origin() - center; //球心到光线原点的向量
+    float a = Vector3f::dot(r.direction(), r.direction());
+    float b = Vector3f::dot(r.direction(), oc); // assert(b<0)
+    float c = Vector3f::dot(oc, oc) - radius * radius;
     float delta = b * b - a * c;
 
     if (delta > 0)
@@ -121,7 +121,7 @@ inline bool MovingSphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) co
  */
 inline bool Sphere::bounding_box(float t0, float t1, AABB &box) const
 {
-    box = AABB(center - vec3(radius, radius, radius), center + vec3(radius, radius, radius));
+    box = AABB(center - Vector3f(radius, radius, radius), center + Vector3f(radius, radius, radius));
     return true;
 }
 
@@ -138,8 +138,8 @@ inline bool MovingSphere::bounding_box(float t0, float t1, AABB &box) const
 {
     //已知两个包围盒，求大包围盒的lambda表达式
 
-    AABB box0 = AABB(center0 - vec3(radius, radius, radius), center0 + vec3(radius, radius, radius));
-    AABB box1 = AABB(center1 - vec3(radius, radius, radius), center1 + vec3(radius, radius, radius));
+    AABB box0 = AABB(center0 - Vector3f(radius, radius, radius), center0 + Vector3f(radius, radius, radius));
+    AABB box1 = AABB(center1 - Vector3f(radius, radius, radius), center1 + Vector3f(radius, radius, radius));
     box = surrounding_box(box0, box1);
     return true;
 }

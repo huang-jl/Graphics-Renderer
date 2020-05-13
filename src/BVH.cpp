@@ -1,6 +1,7 @@
 #include "BVH.hpp"
 #include <algorithm>
 #include <cstdlib>
+#include <iostream>
 
 bool box_compare_(const shared_ptr<Hitable> a, const shared_ptr<Hitable> b, int axis)
 {

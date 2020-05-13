@@ -11,9 +11,9 @@ class AABB
 {
   public:
     AABB() {}
-    AABB(const vec3 &a, const vec3 &b) : min_(a), max_(b) {}
-    vec3 min() const { return min_; }
-    vec3 max() const { return max_; }
+    AABB(const Vector3f &a, const Vector3f &b) : min_(a), max_(b) {}
+    Vector3f min() const { return min_; }
+    Vector3f max() const { return max_; }
 
     /* 判断光线r是否和包围盒相交的算法
      * 具体来说，采用slab的方式
@@ -42,15 +42,15 @@ class AABB
     }
 
     /*data*/
-    vec3 min_; //包围盒的左下角点
-    vec3 max_; //包围盒的右下角点
+    Vector3f min_; //包围盒的左下角点
+    Vector3f max_; //包围盒的右下角点
 };
 
 inline AABB surrounding_box(AABB &box0, AABB &box1)
 {
-    vec3 lower_left = vec3(ffmin(box0.min()[0], box1.min()[0]), ffmin(box0.min()[1], box1.min()[1]),
+    Vector3f lower_left = Vector3f(ffmin(box0.min()[0], box1.min()[0]), ffmin(box0.min()[1], box1.min()[1]),
                            ffmin(box0.min()[2], box1.min()[2]));
-    vec3 upper_right = vec3(ffmax(box0.max()[0], box1.max()[0]), ffmax(box0.max()[1], box1.max()[1]),
+    Vector3f upper_right = Vector3f(ffmax(box0.max()[0], box1.max()[0]), ffmax(box0.max()[1], box1.max()[1]),
                             ffmax(box0.max()[2], box1.max()[2]));
     return AABB(lower_left, upper_right);
 }
