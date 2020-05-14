@@ -5,6 +5,7 @@
 #include "HitableList.hpp"
 #include "Light.hpp"
 #include "Material.hpp"
+#include "Media.hpp"
 #include "Rect.hpp"
 #include "Sphere.hpp"
 #include "Texture.hpp"
@@ -27,7 +28,7 @@ Vector3f color(const Ray &r, shared_ptr<Hitable> world, int depth)
 {
     Hit rec;
     //当交点处的t<0.001的时候，认为不相交，从而能绘出阴影的效果
-    if (world->hit(r, 0.001, MAXFLOAT, rec))
+    if (world->hit(r, 0.001, FLT_MAX, rec))
     {
         //根据法向量构建颜色，最后的图像颜色和法向量有关(x,y,z)<=>(r,g,b)
         //采用递归的方式
@@ -118,16 +119,33 @@ shared_ptr<Hitable> cornell_box() // cornell box测试场景
     shared_ptr<Material> red = make_shared<Lambertian>(Vector3f(0.65, 0.05, 0.05));
     shared_ptr<Material> white = make_shared<Lambertian>(Vector3f(0.73, 0.73, 0.73));
     shared_ptr<Material> green = make_shared<Lambertian>(Vector3f(0.12, 0.45, 0.15));
-    shared_ptr<Material> light = make_shared<DiffuseLight>(Vector3f(15, 15, 15));
+    shared_ptr<Material> light = make_shared<DiffuseLight>(Vector3f(7, 7, 7));
+
+    // shared_ptr<Hitable> box_1 = make_shared<Translate>(
+    //     make_shared<Rotate>(make_shared<Box>(Vector3f(0, 0, 0), Vector3f(165, 165, 165), white), 40, 1),
+    //     Vector3f(130, 0, 65));
+    // shared_ptr<Hitable> box_2 = make_shared<Translate>(
+    //     make_shared<Rotate>(make_shared<Box>(Vector3f(0, 0, 0), Vector3f(165, 330, 165), white), -35, 1),
+    //     Vector3f(265, 0, 295));
+
     shared_ptr<Hitable> box_1 = make_shared<Translate>(
-        make_shared<Rotate>(make_shared<Box>(Vector3f(0, 0, 0), Vector3f(165, 165, 165), white), 40, 1),
+        make_shared<Rotate>(
+            make_shared<ConstantMedium>(make_shared<Box>(Vector3f(0, 0, 0), Vector3f(165, 165, 165), white), 0.01,
+                                        make_shared<ConstantTexture>(Vector3f(1, 1, 1))),
+            -18, 1),
         Vector3f(130, 0, 65));
     shared_ptr<Hitable> box_2 = make_shared<Translate>(
-        make_shared<Rotate>(make_shared<Box>(Vector3f(0, 0, 0), Vector3f(165, 330, 165), white), -35, 1),
+        make_shared<Rotate>(
+            make_shared<ConstantMedium>(make_shared<Box>(Vector3f(0, 0, 0), Vector3f(165, 330, 165), white), 0.01,
+                                        make_shared<ConstantTexture>(Vector3f(0, 0, 0))),
+            15, 1),
         Vector3f(265, 0, 295));
+
+    // shared_ptr<Hitable> fog_1 = make_shared<ConstantMedium>(box_1, 0.01, make_shared<ConstantTexture>(1, 1, 1));
+    // shared_ptr<Hitable> fog_2 = make_shared<ConstantMedium>(box_2, 0.01, make_shared<ConstantTexture>(0, 0, 0));
     list.push_back(make_shared<YZRect>(0, 555, 0, 555, 555, green));
     list.push_back(make_shared<YZRect>(0, 555, 0, 555, 0, red));
-    list.push_back(make_shared<XZRect>(213, 343, 227, 322, 554, light));
+    list.push_back(make_shared<XZRect>(113, 443, 127, 432, 554, light));
     list.push_back(make_shared<XZRect>(0, 555, 0, 555, 0, white));
     list.push_back(make_shared<XYRect>(0, 555, 0, 555, 555, white));
     list.push_back(make_shared<XZRect>(0, 555, 0, 555, 555, white));

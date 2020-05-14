@@ -9,8 +9,8 @@ struct Hit
 {
     float t;
     Vector3f p;
-    Vector3f normal; // unit
-    float u, v; //击中点的u,v信息
+    Vector3f normal;    // unit
+    float u = 0, v = 0; //击中点的u,v信息
     shared_ptr<Material> material_p;
 };
 

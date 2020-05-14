@@ -43,6 +43,12 @@ class Lambertian : public Material
     shared_ptr<Texture> albedo;
 };
 
+/****************************************
+ * 金属材质，需要
+ *      Vector——表示光线吸收量
+ *      f——表示模糊效果，反射会在分布在
+ *          以f为半径的球中
+ ****************************************/
 class Metal : public Material
 {
   public:
@@ -61,6 +67,9 @@ class Metal : public Material
     float fuzz; //模糊效果
 };
 
+/****************************************
+ * 电解质材质，需要一个参数表示折射率
+ ****************************************/
 class Dielectric : public Material
 {
     //电解质材质，不会吸收任何能量，因此attenuation = 1
@@ -111,5 +120,25 @@ class Dielectric : public Material
 
     /*index*/
     float ref_idx;
+};
+
+/****************************************
+ * 各向同性材质，产生一条完全随机的光线
+ *      输入参数为计算反射比的材质
+ * 和Lambertian不同，漫反射至少是和入射光线
+ * 在同一侧
+ ****************************************/
+class Isotropic:public Material
+{
+  public:
+    Isotropic(shared_ptr<Texture> a) : albedo(a) {}
+    virtual bool scatter(const Ray &r_in, const Hit &rec, Vector3f &attenuation, Ray &scattered) const
+    {
+        scattered = Ray(rec.p, random_in_unit_sphere(), r_in.time());
+        attenuation = albedo->value(rec.u, rec.v, rec.p);
+        return true;
+    }
+    /*data*/
+    shared_ptr<Texture> albedo; //反射比
 };
 #endif

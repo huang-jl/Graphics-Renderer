@@ -1,6 +1,6 @@
 #ifndef VECTOR_3F_H
 #define VECTOR_3F_H
-
+#include <iostream>
 class Vector2f;
 
 class Vector3f
@@ -99,5 +99,7 @@ Vector3f operator / ( const Vector3f& v, float f );
 
 bool operator == ( const Vector3f& v0, const Vector3f& v1 );
 bool operator != ( const Vector3f& v0, const Vector3f& v1 );
+
+std::ostream& operator<<(std::ostream&os, const Vector3f&v);
 
 #endif // VECTOR_3F_H

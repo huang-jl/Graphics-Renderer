@@ -14,7 +14,7 @@ class Box : public Hitable
         sides.add_hitable(make_shared<XYRect>(left_b.x(), right_t.x(), left_b.y(), right_t.y(), left_b.z(), m_p));
         sides.add_hitable(make_shared<XYRect>(left_b.x(), right_t.x(), left_b.y(), right_t.y(), right_t.z(), m_p));
         sides.add_hitable(make_shared<YZRect>(left_b.y(), right_t.y(), left_b.z(), right_t.z(), left_b.x(), m_p));
-        sides.add_hitable(make_shared<YZRect>(left_b.y(), right_t.y(), left_b.z(), right_t.z(), right_t.y(), m_p));
+        sides.add_hitable(make_shared<YZRect>(left_b.y(), right_t.y(), left_b.z(), right_t.z(), right_t.x(), m_p));
         sides.add_hitable(make_shared<XZRect>(left_b.x(), right_t.x(), left_b.z(), right_t.z(), left_b.y(), m_p));
         sides.add_hitable(make_shared<XZRect>(left_b.x(), right_t.x(), left_b.z(), right_t.z(), right_t.y(), m_p));
     }

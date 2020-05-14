@@ -17,6 +17,7 @@ class ConstantTexture : public Texture
 {
   public:
     ConstantTexture() {}
+    ConstantTexture(float a, float b, float c) : color(a, b, c) {}
     ConstantTexture(Vector3f c) : color(c) {}
     virtual Vector3f value(float u, float v, const Vector3f &p) const override { return color; }
 
@@ -58,7 +59,7 @@ class NoiseTexture : public Texture
         //采用扰动噪声则默认的返回范围接近(0,2)
         // return noise.turb_noise(scale*p) * Vector3f(1, 1, 1);
 
-        /* 
+        /*
          * 间接采用扰动噪声，将其作用在sin的相(phase)上，起到波纹效果,类似大理石
          * 这里加了一个初始相位p.x()，会使波纹方向朝向比较一致
          * 可以修改初始相位，使大理石纹理朝着自己期望的方向伸展

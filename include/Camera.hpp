@@ -2,10 +2,11 @@
 #define CAMARA_HPP
 #include "Ray.hpp"
 #include "Utils.hpp"
+#include <iostream>
 class Camera
 {
-    /* 这里的的参数都是像素/100后的值
-     * 例如horizontal表示图片的水平方向向量，实际为4.0*100=400 pixel
+    /* 这里的的参数都是 像素/最大像素 后的值
+     * 例如horizontal表示图片的水平方向向量，实际为4.0*nx=pixel
      * 因为相机的位姿首先由一个视线确定
      * 因此可以用一个UP向量来计算相机的旋转操作
      * 我们已知相机处于和光线垂直的平面内
