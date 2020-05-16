@@ -5,6 +5,7 @@ output*
 main
 bin/
 !CMakeLists.txt
+**/Makefile
 \.DS_Store
 \.vscode/
 introduction.cpp
