@@ -4,6 +4,7 @@ CMake*
 output*
 main
 bin/
+**/*.a
 !CMakeLists.txt
 **/Makefile
 \.DS_Store
