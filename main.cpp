@@ -10,10 +10,10 @@
 
 int main()
 {
-    int ny = 800;
+    int ny = 500;
     float aspect = 1.0;
     int nx = ny * aspect;
-    int ns = 50; //我们的采样个数
+    int ns = 200; //我们的采样个数
     Vector3f look_from = Vector3f(278, 278, -800);
     Vector3f look_at = Vector3f(278, 278, 0);
     float focus_d = 10;

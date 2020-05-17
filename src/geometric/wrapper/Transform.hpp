@@ -42,14 +42,14 @@ class Rotate : public Hitable
     virtual bool bounding_box(float t0, float t1, AABB &box) const override;
 
     /*data*/
+    shared_ptr<Hitable> object;
+
     int axis;
     float theta;
     float cos_theta;
     float sin_theta;
     AABB b_box;
     bool has_box;
-
-    shared_ptr<Hitable> object;
 };
 
 #endif

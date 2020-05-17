@@ -20,7 +20,7 @@ class AABB
      * 对每个轴的求光线与包围盒的相交区域
      * 最后比较这些区域是否有重叠
      */
-    bool hit(const Ray &r, float tmin, float tmax) const;
+    bool hit(const Ray &r, float tmin, float tmax, float *t = nullptr) const;
 
     /*data*/
     Vector3f min_; //包围盒的左下角点
