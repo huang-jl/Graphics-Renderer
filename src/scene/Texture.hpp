@@ -37,7 +37,7 @@ class CheckerTexture : public Texture
     virtual Vector3f value(float u, float v, const Vector3f &p) const override
     {
         float sine = sin(10 * p.x()) * sin(10 * p.y()) * sin(10 * p.z());
-        if (sine < 0)
+        if (sine < EPS)
             return odd->value(u, v, p);
         else
             return even->value(u, v, p);
@@ -70,6 +70,28 @@ class NoiseTexture : public Texture
     /*data*/
     Perlin noise;
     int scale;
+};
+
+class ImageTexture : public Texture
+{
+  public:
+    ImageTexture(unsigned char *pixels, int width, int height) : data(pixels), nx(width), ny(height) {}
+    virtual Vector3f value(float u, float v, const Vector3f &p) const override
+    {
+        int i = static_cast<int>(u * nx);
+        int j = static_cast<int>((1 - v) * ny);
+        i = (i < EPS) ? 0 : i;
+        j = (j < EPS) ? 0 : j;
+        i = (i > nx - 1) ? nx - 1 : i;
+        j = (j > ny - 1) ? ny - 1 : j;
+        float r = static_cast<int>(data[3 * i + 3 * nx * j]) / 255.0;
+        float g = static_cast<int>(data[3 * i + 3 * nx * j + 1]) / 255.0;
+        float b = static_cast<int>(data[3 * i + 3 * nx * j + 2]) / 255.0;
+        return Vector3f(r, g, b);
+    }
+    /*data*/
+    unsigned char *data;
+    int nx, ny; //图片的宽度和高度
 };
 
 #endif

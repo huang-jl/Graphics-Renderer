@@ -40,12 +40,13 @@ class Rotate : public Hitable
     virtual bool hit(const Ray &r, float t_min, float t_max, Hit &rec) const override;
 
     virtual bool bounding_box(float t0, float t1, AABB &box) const override;
+    void rotate(float&a, float &b, bool reverse=false)const;
 
     /*data*/
     shared_ptr<Hitable> object;
 
-    int axis;
     float theta;
+    int axis;
     float cos_theta;
     float sin_theta;
     AABB b_box;

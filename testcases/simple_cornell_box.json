@@ -1,0 +1,221 @@
+{
+    "save_path": "./output.ppm",
+    "sample_number": 200,
+    "height": 500,
+    "camera": {
+        "look_from": [
+            278,
+            278,
+            -800
+        ],
+        "look_at": [
+            278,
+            278,
+            0
+        ],
+        "focus_d": 10,
+        "up": [
+            0,
+            1,
+            0
+        ],
+        "apeture": 0,
+        "w_h_ratio": 1.0,
+        "vfov": 40
+    },
+    "scene": [
+        {
+            "name": "rect",
+            "type": "yz",
+            "boundary": [
+                0,
+                555,
+                0,
+                555,
+                555
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.12,
+                    0.45,
+                    0.12
+                ]
+            }
+        },
+        {
+            "name": "rect",
+            "type": "yz",
+            "boundary": [
+                0,
+                555,
+                0,
+                555,
+                0
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.65,
+                    0.05,
+                    0.05
+                ]
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                0,
+                555,
+                0,
+                555,
+                555
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.73,
+                    0.73,
+                    0.73
+                ]
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                0,
+                555,
+                0,
+                555,
+                0
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.73,
+                    0.73,
+                    0.73
+                ]
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xy",
+            "boundary": [
+                0,
+                555,
+                0,
+                555,
+                555
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.73,
+                    0.73,
+                    0.73
+                ]
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                113,
+                443,
+                127,
+                432,
+                554
+            ],
+            "material": {
+                "type": "diffuse_light",
+                "color": [
+                    7,
+                    7,
+                    7
+                ]
+            }
+        },
+        {
+            "name": "box",
+            "left_bottom": [
+                0,
+                0,
+                0
+            ],
+            "right_top": [
+                165,
+                165,
+                165
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.73,
+                    0.73,
+                    0.73
+                ]
+            },
+            "wrapper": [
+                {
+                    "type": "rotate",
+                    "degree": -18,
+                    "axis": 1
+                },
+                {
+                    "type": "translate",
+                    "displacement": [
+                        130,
+                        0,
+                        65
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "box",
+            "left_bottom": [
+                0,
+                0,
+                0
+            ],
+            "right_top": [
+                165,
+                330,
+                165
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.73,
+                    0.73,
+                    0.73
+                ]
+            },
+            "wrapper": [
+                {
+                    "type": "rotate",
+                    "degree": 15,
+                    "axis": 1
+                },
+                {
+                    "type": "translate",
+                    "displacement": [
+                        265,
+                        0,
+                        295
+                    ]
+                }
+            ]
+        }
+    ]
+}

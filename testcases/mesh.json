@@ -1,0 +1,41 @@
+{
+    "save_path": "./output.ppm",
+    "sample_number": 50,
+    "height": 500,
+    "camera": {
+        "look_from": [
+            -1.4,
+            2,
+            -3
+        ],
+        "look_at": [
+            0.5,
+            0.5,
+            0
+        ],
+        "focus_d": 1,
+        "up": [
+            0,
+            1,
+            0
+        ],
+        "apeture": 0,
+        "w_h_ratio": 1.0,
+        "vfov": 40
+    },
+    "scene": [
+        {
+            "name": "mesh",
+            "path": "../OBJ-Models/cube.obj",
+            "material": {
+                "type": "metal",
+                "albedo": [
+                    0.7,
+                    0.65,
+                    0.6
+                ],
+                "fuzz": 0.1
+            }
+        }
+    ]
+}

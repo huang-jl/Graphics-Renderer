@@ -10,3 +10,6 @@ bin/
 \.DS_Store
 \.vscode/
 introduction.cpp
+*.rar
+*.obj
+*.jpg

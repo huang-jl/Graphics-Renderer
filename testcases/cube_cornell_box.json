@@ -1,0 +1,174 @@
+{
+    "save_path": "./output.ppm",
+    "sample_number": 50,
+    "height": 500,
+    "camera": {
+        "look_from": [
+            1.8,
+            0.7,
+            -3
+        ],
+        "look_at": [
+            0.7,
+            0.7,
+            0
+        ],
+        "focus_d": 1,
+        "up": [
+            0,
+            1,
+            0
+        ],
+        "apeture": 0,
+        "w_h_ratio": 1.0,
+        "vfov": 40
+    },
+    "scene": [
+        {
+            "name": "rect",
+            "type": "yz",
+            "boundary": [
+                0,
+                2,
+                0,
+                2,
+                2
+            ],
+            "material": {
+                "type": "metal",
+                "albedo":[0.21, 0.41, 0.22],
+                "fuzz":0.2
+            }
+        },
+        {
+            "name": "rect",
+            "type": "yz",
+            "boundary": [
+                0,
+                2,
+                0,
+                2,
+                0
+            ],
+            "material": {
+                "type": "metal",
+                "albedo":[0.1,0.41,0.15],
+                "fuzz":0.2
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                0,
+                2,
+                0,
+                2,
+                2
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture":"constant",
+                "albedo": [
+                    0.63,
+                    0.63,
+                    0.63
+                ]
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                0,
+                2,
+                0,
+                2,
+                0
+            ],
+            "material": {
+                "type": "metal",
+                "albedo":[0.15,0.22,0.25],
+                "fuzz":0.1
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xy",
+            "boundary": [
+                0,
+                2,
+                0,
+                2,
+                2
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture":"constant",
+                "albedo":[0.73, 0.73, 0.73]
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                0.3,
+                1.7,
+                0.1,
+                1.9,
+                1.99
+            ],
+            "material": {
+                "type": "diffuse_light",
+                "color": [
+                    7,
+                    7,
+                    7
+                ]
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xy",
+            "boundary": [
+                0,
+                2,
+                0,
+                2,
+                -3.2
+            ],
+            "material": {
+                "type": "diffuse_light",
+                "color": [
+                    1.5,
+                    2.5,
+                    7
+                ]
+            }
+        },
+        {
+            "name": "mesh",
+            "path": "../OBJ-Models/cube.obj",
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.7,
+                    0.12,
+                    0.21
+                ],
+                "fuzz": 0.2
+            },
+            "wrapper": [
+                {
+                    "type": "translate",
+                    "displacement": [
+                        0.5,
+                        0,
+                        0.7
+                    ]
+                }
+            ]
+        }
+    ]
+}

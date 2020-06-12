@@ -47,7 +47,8 @@ Vector3f color(const Ray &r, shared_ptr<Hitable> world, int depth)
     // Vector3f unit_direction = (r.direction());
     // float t = 0.5 * (unit_direction.y() + 1.0);
     // return (1.0 - t) * Vector3f(1.0, 1.0, 1.0) + t * Vector3f(0.5, 0.7, 1.0);
-    return Vector3f(0, 0, 0); //纯黑背景
+    // return Vector3f(0.15, 0.22, 0.68); //蓝色背景
+    return Vector3f(0, 0, 0);
 }
 
 shared_ptr<Hitable> generate_scene()
@@ -152,8 +153,8 @@ shared_ptr<Hitable> cornell_box() // cornell box测试场景
     list.push_back(box_1);
     // list.push_back(box_2);
     std::vector<Vector2f> v{Vector2f(0, 0), Vector2f(47, -5.7), Vector2f(96, 52.8), Vector2f(0, 140)};
-    shared_ptr<BezierSurface> bezier_p = make_shared<BezierSurface>(v, make_shared<Lambertian>(Vector3f(1,1,1)));
-    shared_ptr<Translate>t_b = make_shared<Translate>(bezier_p, Vector3f(400,10,200));
+    shared_ptr<BezierSurface> bezier_p = make_shared<BezierSurface>(v, make_shared<Lambertian>(Vector3f(1, 1, 1)));
+    shared_ptr<Translate> t_b = make_shared<Translate>(bezier_p, Vector3f(400, 10, 200));
     list.push_back(t_b);
     std::cerr << "Init over\n";
     return make_shared<HitableList>(list);
@@ -237,7 +238,7 @@ Vector3f random_in_unit_sphere()
     return point;
 }
 
-float degree_to_radius(float degree) //角度制转弧度制
+float degree_to_radian(float degree) //角度制转弧度制
 {
     return degree * M_PI / 180;
 }

@@ -1,0 +1,181 @@
+{
+    "save_path": "./output.ppm",
+    "sample_number": 50,
+    "height": 500,
+    "camera": {
+        "look_from": [
+            50,
+            45,
+            10
+        ],
+        "look_at": [
+            50,
+            65,
+            100
+        ],
+        "focus_d": 5,
+        "up": [
+            0,
+            1,
+            0
+        ],
+        "apeture": 0,
+        "w_h_ratio": 1.0,
+        "vfov": 50
+    },
+    "scene": [
+        {
+            "name": "rect",
+            "type": "yz",
+            "boundary": [
+                0,
+                150,
+                0,
+                250,
+                100
+            ],
+            "material": {
+                "type": "metal",
+                "albedo": [
+                    0.71,
+                    0.31,
+                    0.22
+                ],
+                "fuzz": 0.7
+            }
+        },
+        {
+            "name": "rect",
+            "type": "yz",
+            "boundary": [
+                0,
+                150,
+                0,
+                250,
+                0
+            ],
+            "material": {
+                "type": "metal",
+                "albedo": [
+                    0.14,
+                    0.52,
+                    0.15
+                ],
+                "fuzz": 1.2
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                0,
+                100,
+                0,
+                250,
+                150
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.63,
+                    0.63,
+                    0.63
+                ]
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                0,
+                100,
+                0,
+                250,
+                0
+            ],
+            "material": {
+                "type": "metal",
+                "albedo": [
+                    0.15,
+                    0.22,
+                    0.55
+                ],
+                "fuzz": 0.8
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xy",
+            "boundary": [
+                0,
+                100,
+                0,
+                150,
+                250
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.73,
+                    0.73,
+                    0.73
+                ]
+            }
+        },
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                15,
+                85,
+                55,
+                195,
+                149.9
+            ],
+            "material": {
+                "type": "diffuse_light",
+                "color": [
+                    7,
+                    7,
+                    7
+                ]
+            }
+        },
+        {
+            "name": "mesh",
+            "path": "../OBJ-Models/dinosaur.2k.obj",
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.15,
+                    0.52,
+                    0.21
+                ],
+                "fuzz": 0.2
+            },
+            "wrapper": [
+                {
+                    "type": "rotate",
+                    "degree": 90,
+                    "axis": 0
+                },
+                {
+                    "type": "rotate",
+                    "degree": 160,
+                    "axis": 1
+                },
+                {
+                    "type": "translate",
+                    "displacement": [
+                        50,
+                        50,
+                        160
+                    ]
+                }
+            ]
+        }
+    ]
+}

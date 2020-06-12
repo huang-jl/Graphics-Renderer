@@ -4,13 +4,13 @@
  ****************************************/
 XYRect::XYRect(float x_0, float x_1, float y_0, float y_1, float z_, shared_ptr<Material> m_p) : Hitable(m_p), z(z_)
 {
-    x0 = imin(x_0, x_1);
-    x1 = imax(x_0, x_1);
-    y0 = imin(y_0, y_1);
-    y1 = imax(y_0, y_1);
+    x0 = ffmin(x_0, x_1);
+    x1 = ffmax(x_0, x_1);
+    y0 = ffmin(y_0, y_1);
+    y1 = ffmax(y_0, y_1);
 }
 
- bool XYRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
+bool XYRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
 {
     const float inv_dir = 1.0 / r.direction().z();
     float t = (z - r.origin().z()) * inv_dir; //根据平面的z坐标求出t
@@ -29,7 +29,7 @@ XYRect::XYRect(float x_0, float x_1, float y_0, float y_1, float z_, shared_ptr<
     return true;
 }
 
- bool XYRect::bounding_box(float t0, float t1, AABB &box) const
+bool XYRect::bounding_box(float t0, float t1, AABB &box) const
 {
     const float epsilon = 0.001;
     box = AABB(Vector3f(x0, y0, z - epsilon), Vector3f(x1, y1, z + epsilon));
@@ -41,13 +41,13 @@ XYRect::XYRect(float x_0, float x_1, float y_0, float y_1, float z_, shared_ptr<
  ****************************************/
 YZRect::YZRect(float y_0, float y_1, float z_0, float z_1, float x_, shared_ptr<Material> m_p) : Hitable(m_p), x(x_)
 {
-    z0 = imin(z_0, z_1);
-    z1 = imax(z_0, z_1);
-    y0 = imin(y_0, y_1);
-    y1 = imax(y_0, y_1);
+    z0 = ffmin(z_0, z_1);
+    z1 = ffmax(z_0, z_1);
+    y0 = ffmin(y_0, y_1);
+    y1 = ffmax(y_0, y_1);
 }
 
- bool YZRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
+bool YZRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
 {
     const float inv_dir = 1.0 / r.direction().x();
     float t = (x - r.origin().x()) * inv_dir; //根据平面的x坐标求出t
@@ -66,7 +66,7 @@ YZRect::YZRect(float y_0, float y_1, float z_0, float z_1, float x_, shared_ptr<
     return true;
 }
 
- bool YZRect::bounding_box(float t0, float t1, AABB &box) const
+bool YZRect::bounding_box(float t0, float t1, AABB &box) const
 {
     const float epsilon = 0.001;
     box = AABB(Vector3f(x - epsilon, y0, z0), Vector3f(x + epsilon, y1, z1));
@@ -78,12 +78,13 @@ YZRect::YZRect(float y_0, float y_1, float z_0, float z_1, float x_, shared_ptr<
  ****************************************/
 XZRect::XZRect(float x_0, float x_1, float z_0, float z_1, float y_, shared_ptr<Material> m_p) : Hitable(m_p), y(y_)
 {
-    x0 = imin(x_0, x_1);
-    x1 = imax(x_0, x_1);
-    z0 = imin(z_0, z_1);
-    z1 = imax(z_0, z_1);
+    x0 = ffmin(x_0, x_1);
+    x1 = ffmax(x_0, x_1);
+    z0 = ffmin(z_0, z_1);
+    z1 = ffmax(z_0, z_1);
 }
- bool XZRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
+
+bool XZRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
 {
     const float inv_dir = 1.0 / r.direction().y();
     float t = (y - r.origin().y()) * inv_dir; //根据平面的z坐标求出t
@@ -101,7 +102,7 @@ XZRect::XZRect(float x_0, float x_1, float z_0, float z_1, float y_, shared_ptr<
     rec.material_p = material_p;
     return true;
 }
- bool XZRect::bounding_box(float t0, float t1, AABB &box) const
+bool XZRect::bounding_box(float t0, float t1, AABB &box) const
 {
     const float epsilon = 0.001;
     box = AABB(Vector3f(x0, y - epsilon, z0), Vector3f(x1, y + epsilon, z1));
@@ -122,13 +123,10 @@ Box::Box(Vector3f left_bottom, Vector3f right_top, shared_ptr<Material> m_p)
     sides.add_hitable(make_shared<XZRect>(left_b.x(), right_t.x(), left_b.z(), right_t.z(), right_t.y(), m_p));
 }
 
- bool Box::bounding_box(float t0, float t1, AABB &box) const
+bool Box::bounding_box(float t0, float t1, AABB &box) const
 {
     box = AABB(left_b, right_t);
     return true;
 }
 
- bool Box::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
-{
-    return sides.hit(r, t_min, t_max, rec);
-}
+bool Box::hit(const Ray &r, float t_min, float t_max, Hit &rec) const { return sides.hit(r, t_min, t_max, rec); }

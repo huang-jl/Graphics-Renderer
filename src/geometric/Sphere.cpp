@@ -2,7 +2,22 @@
 
 /****************************************
  * Sphere
-****************************************/
+ ****************************************/
+
+/****************************************
+ * 对球面进行UV纹理贴图
+ * input:
+ * 交点的坐标p，待求的u，v坐标
+ *
+ ****************************************/
+void Sphere::get_sphere_uv(const Vector3f &p, float &u, float &v)
+{
+    float phi = atan2(p.z(), p.x()); //经度，绕着两级旋转的角度
+    float theta = asin(p.y());       //纬度，即法线与赤道平面夹角
+    u = 1 - (phi + M_PI) / (2 * M_PI);
+    v = (theta + M_PI / 2) / M_PI;
+}
+
 bool Sphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
 {
     //参略一些可以约去的2
@@ -21,6 +36,7 @@ bool Sphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
             rec.p = r.point_at_parameter(rec.t);
             rec.normal = (rec.p - center) / radius; //单位化
             rec.material_p = material_p;
+            Sphere::get_sphere_uv(rec.p - center, rec.u, rec.v);
             return true;
         }
         temp = (-b + sqrt(delta)) / a;
@@ -30,6 +46,7 @@ bool Sphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
             rec.p = r.point_at_parameter(rec.t);
             rec.normal = (rec.p - center) / radius; //单位化
             rec.material_p = material_p;
+            Sphere::get_sphere_uv(rec.p - center, rec.u, rec.v);
             return true;
         }
     }
@@ -38,7 +55,7 @@ bool Sphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
 
 /****************************************
  * Moving Sphere
-****************************************/
+ ****************************************/
 bool MovingSphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
 {
     //获得光线所在时刻球体的位置

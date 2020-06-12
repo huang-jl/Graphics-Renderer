@@ -8,6 +8,7 @@ using std::shared_ptr;
 using std::make_shared;
 
 #define MAX_DEPTH 50
+#define EPS 1e-3
 
 class Ray;
 class Hitable;
@@ -63,7 +64,7 @@ shared_ptr<Hitable> two_sphere();//测试纹理
 shared_ptr<Hitable> simple_light();//测试光源
 shared_ptr<Hitable> cornell_box();  //cornell box测试厂家
 
-float degree_to_radius(float degree);//角度制转弧度制
+float degree_to_radian(float degree);//角度制转弧度制
 float ffmin(float a, float b);
 float ffmax(float a, float b);
 int imin(int a,int b);

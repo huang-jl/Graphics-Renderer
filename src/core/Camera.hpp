@@ -38,10 +38,10 @@ class Camera
            float focus_dist, float t0, float t1);
 
     //相机产生光线的函数
-    Ray get_ray(float s, float t);
+    Ray get_ray(float s, float t)const;
 
   protected:
-    inline Vector3f random_point_on_disk() { return 2 * Vector3f(get_rand(), get_rand(), 0) - Vector3f(1.0, 1.0, 0); }
+    inline Vector3f random_point_on_disk()const { return 2 * Vector3f(get_rand(), get_rand(), 0) - Vector3f(1.0, 1.0, 0); }
 
   public:
     /*相机参数*/

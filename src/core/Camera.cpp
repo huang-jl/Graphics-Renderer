@@ -12,7 +12,7 @@ Camera::Camera(Vector3f look_from, Vector3f look_at, Vector3f vup, float vfov, f
                float focus_dist, float t0, float t1)
     : time0(t0), time1(t1)
 {
-    float theta = degree_to_radius(vfov);
+    float theta = degree_to_radian(vfov);
     float half_height = tan(theta / 2.0);
     float half_width = half_height * aspect;
     lens_radius = aperture / 2.0;
@@ -26,7 +26,7 @@ Camera::Camera(Vector3f look_from, Vector3f look_at, Vector3f vup, float vfov, f
     vertical = 2 * half_height * focus_dist * v;
 }
 
-Ray Camera::get_ray(float s, float t)
+Ray Camera::get_ray(float s, float t) const
 {
     Vector3f random_point = lens_radius * random_point_on_disk();
     Vector3f offset = random_point.x() * u + random_point.y() * v;
