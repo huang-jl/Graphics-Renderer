@@ -1,4 +1,6 @@
 #include "Sphere.hpp"
+#include "ONB.hpp"
+#include <cfloat>
 
 /****************************************
  * Sphere
@@ -34,8 +36,8 @@ bool Sphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
         {
             rec.t = temp;
             rec.p = r.point_at_parameter(rec.t);
-            rec.normal = (rec.p - center) / radius; //单位化
             rec.material_p = material_p;
+            rec.set_normal(r, (rec.p - center) / radius);
             Sphere::get_sphere_uv(rec.p - center, rec.u, rec.v);
             return true;
         }
@@ -44,13 +46,35 @@ bool Sphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
         {
             rec.t = temp;
             rec.p = r.point_at_parameter(rec.t);
-            rec.normal = (rec.p - center) / radius; //单位化
             rec.material_p = material_p;
+            rec.set_normal(r, (rec.p - center) / radius);
             Sphere::get_sphere_uv(rec.p - center, rec.u, rec.v);
             return true;
         }
     }
     return false;
+}
+
+float Sphere::pdf_value(const Vector3f &o, const Vector3f &dir) const
+{
+    Hit rec;
+    if (this->hit(Ray(o, dir), EPS, FLT_MAX, rec))
+    {
+        float cos_theta_max = sqrt(1 - radius * radius / (center - o).squaredLength());
+        float solid_angle = 2.0 * M_PI * (1 - cos_theta_max);
+        return 1 / solid_angle;
+    }
+    else
+        return 0.0;
+}
+
+Vector3f Sphere::random(const Vector3f &o) const
+{
+    Vector3f direction = center - o;
+    float distance_squared = direction.squaredLength();
+    ONB uvw;
+    uvw.build_from_w(direction);
+    return uvw.local(random_to_sphere(radius, distance_squared));
 }
 
 /****************************************
@@ -67,6 +91,7 @@ bool MovingSphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
     float c = Vector3f::dot(oc, oc) - radius * radius;
     float delta = b * b - a * c;
 
+    rec.front_face = c > EPS ? true : false;
     if (delta > 0)
     {
         float temp = (-b - sqrt(delta)) / a;
@@ -74,7 +99,7 @@ bool MovingSphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
         {
             rec.t = temp;
             rec.p = r.point_at_parameter(rec.t);
-            rec.normal = (rec.p - center) / radius; //单位化
+            rec.set_normal(r, (rec.p - center) / radius);
             rec.material_p = material_p;
             return true;
         }
@@ -83,7 +108,7 @@ bool MovingSphere::hit(const Ray &r, float tmin, float tmax, Hit &rec) const
         {
             rec.t = temp;
             rec.p = r.point_at_parameter(rec.t);
-            rec.normal = (rec.p - center) / radius; //单位化
+            rec.set_normal(r, (rec.p - center) / radius);
             rec.material_p = material_p;
             return true;
         }

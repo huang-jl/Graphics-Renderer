@@ -36,7 +36,7 @@ bool BezierSurface::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
     //坐标为(B_x(u)cos o, B_y(u), B_x(u)sin o)
     //光线为(origin.x + t*dir.x, origin.y + t*dir.y, origin.z + t*dir.z)
     //使用牛顿迭代法求解，初始值为光线和层次包围盒交点
-    float t, u = get_rand(), theta;
+    float t, u = get_frand(), theta;
     if (!b_box.hit(r, t_min, t_max, &t))
         return false;
     theta = atan2(r.origin().z() + r.direction().z() * t, r.origin().x() + r.direction().x() * t);
@@ -81,7 +81,7 @@ bool BezierSurface::NewtonIter(const Vector3f &origin, const Vector3f &dir, floa
         if (is_singular)
         {
             // std::cerr << "Singular!\n";
-            u = get_rand();
+            u = get_frand();
             continue;
         }
         Vector3f delta = J_F_inv * F;

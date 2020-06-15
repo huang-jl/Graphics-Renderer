@@ -79,7 +79,7 @@ Vector3f *Perlin::perlin_generate()
 {
     Vector3f *rand_f = new Vector3f[POINT_NUM];
     for (int i = 0; i < POINT_NUM; ++i)
-        rand_f[i] = (2 * Vector3f(get_rand(), get_rand(), get_rand()) - Vector3f(1, 1, 1)).normalized();
+        rand_f[i] = (2 * Vector3f(get_frand(), get_frand(), get_frand()) - Vector3f(1, 1, 1)).normalized();
     return rand_f;
 }
 
@@ -87,7 +87,7 @@ void Perlin::permute(int *array)
 {
     for (int i = POINT_NUM - 1; i > 0; --i)
     {
-        int target = static_cast<int>(get_rand() * POINT_NUM);
+        int target = static_cast<int>(get_frand() * POINT_NUM);
         std::swap(array[target], array[i]);
     }
 }

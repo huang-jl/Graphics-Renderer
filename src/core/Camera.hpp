@@ -41,7 +41,7 @@ class Camera
     Ray get_ray(float s, float t)const;
 
   protected:
-    inline Vector3f random_point_on_disk()const { return 2 * Vector3f(get_rand(), get_rand(), 0) - Vector3f(1.0, 1.0, 0); }
+    inline Vector3f random_point_on_disk()const { return 2 * Vector3f(get_frand(), get_frand(), 0) - Vector3f(1.0, 1.0, 0); }
 
   public:
     /*相机参数*/

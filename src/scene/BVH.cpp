@@ -26,7 +26,7 @@ BVHNode::BVHNode(std::vector<shared_ptr<Hitable>> &l, size_t start, size_t end, 
     }
     else
     {
-        int axis = static_cast<int>(3 * get_rand());
+        int axis = static_cast<int>(3 * get_frand());
         auto comparator = (axis == 0) ? box_x_compare_ : (axis == 1) ? box_y_compare_ : box_z_compare_;
         // if (axis == 0)
         //     std::sort(l.begin() + start, l.begin() + end, box_x_compare_);

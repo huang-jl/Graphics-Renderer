@@ -37,3 +37,20 @@ bool HitableList::bounding_box(float t0, float t1, AABB &box) const
     }
     return true;
 }
+
+float HitableList::pdf_value(const Vector3f &o, const Vector3f &dir) const
+{
+    float weight = 1.0 / list.size();
+    float sum = 0.0;
+    for (int i = 0; i < list.size(); ++i)
+    {
+        sum += list[i]->pdf_value(o, dir);
+    }
+    return sum * weight;
+}
+
+Vector3f HitableList::random(const Vector3f &o) const
+{
+    int index = get_irand(0, list.size() - 1);
+    return list[index]->random(o);
+}

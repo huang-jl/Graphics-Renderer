@@ -30,6 +30,6 @@ Ray Camera::get_ray(float s, float t) const
 {
     Vector3f random_point = lens_radius * random_point_on_disk();
     Vector3f offset = random_point.x() * u + random_point.y() * v;
-    float r_time = time0 + get_rand() * (time1 - time0);
+    float r_time = time0 + get_frand() * (time1 - time0);
     return Ray(origin + offset, lower_left_corner - origin - offset + s * horizontal + t * vertical, r_time);
 }

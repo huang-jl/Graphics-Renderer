@@ -1,17 +1,17 @@
 {
     "save_path": "./output.ppm",
-    "sample_number": 50,
+    "sample_number": 10,
     "height": 500,
     "camera": {
         "look_from": [
-            50,
-            45,
-            10
+            85,
+            75,
+            -50
         ],
         "look_at": [
-            50,
-            65,
-            100
+            90,
+            75,
+            20
         ],
         "focus_d": 5,
         "up": [
@@ -23,6 +23,22 @@
         "w_h_ratio": 1.0,
         "vfov": 50
     },
+    "importance": [
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                15,
+                85,
+                55,
+                195,
+                149.9
+            ],
+            "material": {
+                "type": "null"
+            }
+        }
+    ],
     "scene": [
         {
             "name": "rect",
@@ -32,17 +48,23 @@
                 150,
                 0,
                 250,
-                100
+                150
             ],
             "material": {
                 "type": "metal",
+                "texture": "constant",
                 "albedo": [
-                    0.71,
-                    0.31,
-                    0.22
+                    0.85,
+                    0.41,
+                    0.65
                 ],
-                "fuzz": 0.7
-            }
+                "fuzz": 0.11
+            },
+            "wrapper": [
+                {
+                    "type": "flip"
+                }
+            ]
         },
         {
             "name": "rect",
@@ -56,12 +78,13 @@
             ],
             "material": {
                 "type": "metal",
+                "texture": "constant",
                 "albedo": [
-                    0.14,
-                    0.52,
-                    0.15
+                    0.462,
+                    0.83,
+                    0.47
                 ],
-                "fuzz": 1.2
+                "fuzz": 0.09
             }
         },
         {
@@ -69,7 +92,7 @@
             "type": "xz",
             "boundary": [
                 0,
-                100,
+                150,
                 0,
                 250,
                 150
@@ -82,26 +105,32 @@
                     0.63,
                     0.63
                 ]
-            }
+            },
+            "wrapper": [
+                {
+                    "type": "flip"
+                }
+            ]
         },
         {
             "name": "rect",
             "type": "xz",
             "boundary": [
                 0,
-                100,
+                150,
                 0,
                 250,
                 0
             ],
             "material": {
                 "type": "metal",
+                "texture": "constant",
                 "albedo": [
-                    0.15,
-                    0.22,
-                    0.55
+                    0.41,
+                    0.67,
+                    0.85
                 ],
-                "fuzz": 0.8
+                "fuzz": 0.05
             }
         },
         {
@@ -109,10 +138,35 @@
             "type": "xy",
             "boundary": [
                 0,
-                100,
+                150,
                 0,
                 150,
                 250
+            ],
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.73,
+                    0.73,
+                    0.73
+                ]
+            },
+            "wrapper": [
+                {
+                    "type": "flip"
+                }
+            ]
+        },
+        {
+            "name": "rect",
+            "type": "xy",
+            "boundary": [
+                0,
+                150,
+                0,
+                150,
+                -80
             ],
             "material": {
                 "type": "lambertian",
@@ -128,40 +182,41 @@
             "name": "rect",
             "type": "xz",
             "boundary": [
-                15,
-                85,
-                55,
-                195,
+                35,
+                115,
+                75,
+                175,
                 149.9
             ],
             "material": {
                 "type": "diffuse_light",
                 "color": [
-                    7,
-                    7,
-                    7
+                    12,
+                    12,
+                    12
                 ]
-            }
-        },
-        {
-            "name": "mesh",
-            "path": "../OBJ-Models/dinosaur.2k.obj",
-            "material": {
-                "type": "lambertian",
-                "texture": "constant",
-                "albedo": [
-                    0.15,
-                    0.52,
-                    0.21
-                ],
-                "fuzz": 0.2
             },
             "wrapper": [
                 {
-                    "type": "rotate",
-                    "degree": 90,
-                    "axis": 0
-                },
+                    "type": "flip"
+                }
+            ]
+        },
+        {
+            "name": "mesh",
+            "path": "../OBJ-Models/fixed.perfect.dragon.100K.0.07.obj",
+            "scale": 40,
+            "material": {
+                "type": "metal",
+                "texture": "constant",
+                "albedo": [
+                    0.96,
+                    0.82,
+                    0.05
+                ],
+                "fuzz": 0.45
+            },
+            "wrapper": [
                 {
                     "type": "rotate",
                     "degree": 160,
@@ -170,9 +225,9 @@
                 {
                     "type": "translate",
                     "displacement": [
-                        50,
-                        50,
-                        160
+                        100,
+                        28,
+                        170
                     ]
                 }
             ]

@@ -14,7 +14,9 @@ class Sphere : public Hitable
     Sphere(Vector3f cen, float r, shared_ptr<Material> m) : Hitable(m), center(cen), radius(r) {}
     virtual bool hit(const Ray &r, float tmin, float tmax, Hit &rec) const override;
     virtual bool bounding_box(float t0, float t1, AABB &box) const override;
-    static void get_sphere_uv(const Vector3f&p, float&u, float&v);
+    virtual float pdf_value(const Vector3f &o, const Vector3f &dir) const override;
+    virtual Vector3f random(const Vector3f &o) const override;
+    static void get_sphere_uv(const Vector3f &p, float &u, float &v);
     /*data*/
     Vector3f center;
     float radius;

@@ -2,23 +2,41 @@
 #define MATERIAL_HPP
 
 #include "Hitable.hpp"
+#include "ONB.hpp"
+#include "PDF.hpp"
 #include "Ray.hpp"
 #include "Texture.hpp"
 #include "Utils.hpp"
 
+/****************************************
+ * 记录散射光线的信息
+ * 支持重要性采样
+ ****************************************/
+struct ScatterRecord
+{
+    /* data */
+    Ray specular_ray;
+    bool is_specular;        //是否是镜面光线
+    Vector3f attenuation;    //衰减率
+    shared_ptr<PDF> pdf_ptr; //重要性采样类
+};
+
 /*
  * 为了支持运动模糊，注意散射光线的时刻和入射光线一致
  */
-
 class Material
 {
   public:
     virtual ~Material(){};
     // input:输入光线、交点信息
     // output:(r,g,b)的衰减量，散射光线
-    virtual bool scatter(const Ray &r_in, const Hit &rec, Vector3f &attenuation, Ray &scattered) const = 0;
+    virtual bool scatter(const Ray &r_in, const Hit &rec, ScatterRecord &scattered) const { return false; };
+    virtual float scattering_pdf(const Ray &r_in, const Hit &rec, const Ray &scattered) const
+    {
+        return 0;
+    }; //散射光线的概率密度
     //光源材质需要重写的虚函数，默认材质是不带任何颜色的
-    virtual Vector3f emitted(float u, float v, Vector3f &p) const { return Vector3f(0, 0, 0); }
+    virtual Vector3f emitted(const Hit &rec, float u, float v, Vector3f &p) const { return Vector3f(0, 0, 0); }
 };
 
 class Lambertian : public Material
@@ -31,11 +49,21 @@ class Lambertian : public Material
   public:
     Lambertian(shared_ptr<Texture> a) : albedo(a) {}
     Lambertian(Vector3f a) { albedo = make_shared<ConstantTexture>(a); }
-    virtual bool scatter(const Ray &r_in, const Hit &rec, Vector3f &attenuation, Ray &scattered) const
+
+    virtual float scattering_pdf(const Ray &r_in, const Hit &rec, const Ray &scattered) const //散射光线的密度函数
     {
-        Vector3f target = rec.p + rec.normal + random_in_unit_sphere();
-        scattered = Ray(rec.p, target - rec.p, r_in.time());
-        attenuation = albedo->value(rec.u, rec.v, rec.p);
+        //密度函数为散射光和法向量夹角的余弦cos/PI
+        float cosine = Vector3f::dot(rec.normal, scattered.direction().normalized());
+        if (cosine < 0) //散射光线应该和法向量成锐角
+            cosine = 0;
+        return cosine / M_PI;
+    }
+
+    virtual bool scatter(const Ray &r_in, const Hit &rec, ScatterRecord &scattered) const
+    {
+        scattered.is_specular = false;
+        scattered.attenuation = albedo->value(rec.u, rec.v, rec.p);
+        scattered.pdf_ptr = make_shared<CosinePDF>(rec.normal); //以法向量为z轴构建坐标系
         return true;
     }
 
@@ -55,13 +83,15 @@ class Metal : public Material
   public:
     // a表示吸收率，f表示模糊效果的大小
     Metal(const Vector3f &a, float f = 0) : albedo(a) { fuzz = (f < 1) ? f : 1; }
-    virtual bool scatter(const Ray &r_in, const Hit &rec, Vector3f &attenuation, Ray &scattered) const
+    virtual bool scatter(const Ray &r_in, const Hit &rec, ScatterRecord &scattered) const override
     {
-        //反射光线会随机的加上一个散布在球体中的向量
-        scattered = Ray(rec.p, reflect(r_in.direction(), rec.normal) + fuzz * random_in_unit_sphere(), r_in.time());
-        attenuation = albedo;
-        //从外界射入才会反射
-        return Vector3f::dot(scattered.direction(), rec.normal) > 0;
+        Vector3f reflected = reflect(r_in.direction().normalized(), rec.normal); //根据反射定律获得反射光
+        scattered.is_specular = true;
+        scattered.attenuation = albedo;
+        //反射光线会加上一个fuzz的扰动，不让表面过于尖锐
+        scattered.specular_ray = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
+        scattered.pdf_ptr = nullptr;
+        return true;
     }
     /*data*/
     Vector3f albedo;
@@ -76,45 +106,33 @@ class Dielectric : public Material
     //电解质材质，不会吸收任何能量，因此attenuation = 1
   public:
     Dielectric(float ri) : ref_idx(ri) {}
-    virtual bool scatter(const Ray &r_in, const Hit &rec, Vector3f &attenuation, Ray &scattered) const
+    virtual bool scatter(const Ray &r_in, const Hit &rec, ScatterRecord &scattered) const override
     {
-        attenuation = Vector3f(1.0, 1.0, 1.0); //不吸收任何能量
-        Vector3f outward_normal;
-        Vector3f reflected = reflect(r_in.direction(), rec.normal);
-        float n_relative;
-        Vector3f refracted;
-        float cosine, reflect_prob;
-        if (Vector3f::dot(r_in.direction(), rec.normal) > 0)
+        scattered.attenuation = Vector3f(1.0, 1.0, 1.0); //不吸收任何能量
+        scattered.is_specular = true;
+        scattered.pdf_ptr = nullptr;
+        float n_relative = rec.front_face ? (1.0 / ref_idx) : ref_idx;
+
+        Vector3f unit_dir = r_in.direction().normalized();
+        float cosine = ffmin(Vector3f::dot(-unit_dir, rec.normal), 1.0);
+        float sine = sqrt(1 - cosine * cosine);
+        if (n_relative * sine > 1)
         {
-            //从物体的内部折射
-            outward_normal = -rec.normal;
-            n_relative = ref_idx;
-            cosine = Vector3f::dot(r_in.direction(), rec.normal) / r_in.direction().length();
+            Vector3f reflected = reflect(unit_dir, rec.normal);
+            scattered.specular_ray = Ray(rec.p, reflected, r_in.time());
+            return true;
+        }
+        float reflect_prob = schlick(cosine, ref_idx);
+        if (get_frand() < reflect_prob)
+        {
+            Vector3f reflected = reflect(unit_dir, rec.normal);
+            scattered.specular_ray = Ray(rec.p, reflected, r_in.time());
+            return true;
         }
         else
         {
-            //外界射到物体上
-            outward_normal = rec.normal;
-            n_relative = 1.0 / ref_idx;
-            cosine = -Vector3f::dot(r_in.direction(), rec.normal) / r_in.direction().length();
-        }
-        //计算反射比
-        if (refract(r_in.direction(), outward_normal, n_relative, refracted))
-        {
-            reflect_prob = schlick(cosine, ref_idx);
-        }
-        else
-        {
-            reflect_prob = 1.0;
-        }
-        //根据反射比求之后的散射光线
-        if (get_rand() < reflect_prob)
-        {
-            scattered = Ray(rec.p, reflected, r_in.time());
-        }
-        else
-        {
-            scattered = Ray(rec.p, refracted, r_in.time());
+            Vector3f refracted = refract(unit_dir, rec.normal, n_relative, cosine);
+            scattered.specular_ray = Ray(rec.p, refracted, r_in.time());
         }
         return true;
     }

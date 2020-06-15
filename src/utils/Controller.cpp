@@ -24,6 +24,7 @@ using std::string;
 using std::vector;
 using namespace rapidjson;
 
+const char split_line[] = "****************************************\n";
 Vector3f create_from_json_array(const Value &array)
 {
     assert(array.IsArray());
@@ -61,15 +62,24 @@ void Controller::generate_pic() const
             std::cout << "start : " << height - 1 - y << "/" << height << "\t(" << 100 * processed / total << "%)"
                       << "\r";
             Vector3f col(0, 0, 0);
+            Vector3f temp;
             //抗锯齿采样
             for (int s = 0; s < sample_num; ++s)
             {
                 //这个地方很重要，将(u,v)映射为(0,1)范围，这样nx和ny
                 //就只是图像的一个大小比例，而不会影响图像的显示范围
-                float u = float(x + get_rand()) / float(width);
-                float v = float(y + get_rand()) / float(height);
+                float u = float(x + get_frand()) / float(width);
+                float v = float(y + get_frand()) / float(height);
                 Ray r = camera.get_ray(u, v);
-                col += color(r, world, 0);
+                temp = color(r, world, sample_list, 0);
+#ifdef DEBUG
+                if (temp[0] != temp[0] || temp[1] != temp[1] || temp[2] != temp[2])
+                {
+                    std::cout << temp << "\n";
+                    std::cerr << "Meet NaN\n";
+                }
+#endif
+                col += temp;
             }
             col = col / float(sample_num);
             col = Vector3f(sqrt(col[0]), sqrt(col[1]), sqrt(col[2])); //使用gamma2校验
@@ -97,7 +107,6 @@ bool Controller::parse(const char *filename) //解析表示输入场景的json�
     string s(bytes.data(), length);
 
     /*2.解析json文件*/
-    const char split_line[] = "****************************************\n";
     Document d;
     d.Parse(s.c_str());
     for (auto itr = d.MemberBegin(); itr != d.MemberEnd(); ++itr)
@@ -124,47 +133,27 @@ bool Controller::parse(const char *filename) //解析表示输入场景的json�
             parse_camera(camera_info);
             std::cout << split_line;
         }
+        else if (strcmp(itr->name.GetString(), "importance") == 0)
+        {
+            std::cout << "importance shape\n";
+            const Value &importance = itr->value;
+            shared_ptr<HitableList> imp_list = make_shared<HitableList>();
+            for (auto imp_itr = importance.Begin(); imp_itr != importance.End(); ++imp_itr)
+            {
+                shared_ptr<Hitable> imp_obj = parse_hitable(*imp_itr);
+                imp_list->add_hitable(imp_obj);
+            }
+            sample_list = imp_list;
+            std::cout << split_line;
+        }
         else if (strcmp(itr->name.GetString(), "scene") == 0) /*场景*/
         {
             const Value &scene = itr->value;
-            for (Value::ConstValueIterator itr = scene.Begin(); itr != scene.End(); ++itr)
+            shared_ptr<Hitable> o;
+            for (Value::ConstValueIterator scene_itr = scene.Begin(); scene_itr != scene.End(); ++scene_itr)
             {
-                auto scene_itr = itr->FindMember("name");
-                if (scene_itr == itr->MemberEnd())
-                {
-                    std::cerr << "场景(scene)解析错误，没有name字段\n";
-                    return false;
-                }
-                if (strcmp(scene_itr->value.GetString(), "sphere") == 0)
-                {
-                    std::cout << "Parse Sphere\n";
-                    parse_sphere(*itr);
-                    std::cout << split_line;
-                }
-                else if (strcmp(scene_itr->value.GetString(), "box") == 0)
-                {
-                    std::cout << "Parse Box\n";
-                    parse_box(*itr);
-                    std::cout << split_line;
-                }
-                else if (strcmp(scene_itr->value.GetString(), "mesh") == 0)
-                {
-                    std::cout << "Parse Mesh\n";
-                    parse_mesh(*itr);
-                    std::cout << split_line;
-                }
-                else if (strcmp(scene_itr->value.GetString(), "curve") == 0)
-                {
-                    std::cout << "Parse Curve\n";
-                    parse_curve(*itr);
-                    std::cout << split_line;
-                }
-                else if (strcmp(scene_itr->value.GetString(), "rect") == 0)
-                {
-                    std::cout << "Parse Rect\n";
-                    parse_rect(*itr);
-                    std::cout << split_line;
-                }
+                o = parse_hitable(*scene_itr);
+                objects.push_back(o);
             }
         }
     }
@@ -172,7 +161,7 @@ bool Controller::parse(const char *filename) //解析表示输入场景的json�
     return true;
 }
 
-bool Controller::parse_sphere(const Value &json)
+shared_ptr<Hitable> Controller::parse_sphere(const Value &json)
 {
     const Value &center_info = json["center"];
     Vector3f center = create_from_json_array(center_info);
@@ -187,25 +176,28 @@ bool Controller::parse_sphere(const Value &json)
         for (const auto &wrapper : json["wrapper"].GetArray())
             sphere = parser_wrapper(wrapper, sphere);
     }
-    objects.push_back(sphere);
-    return true;
+    return sphere;
 }
 
-bool Controller::parse_mesh(const Value &json)
+shared_ptr<Hitable> Controller::parse_mesh(const Value &json)
 {
     const char *filename = json["path"].GetString();
     shared_ptr<Material> m_p = parse_material(json["material"]);
-    shared_ptr<Hitable> mesh = make_shared<Mesh>(filename, m_p);
+    float scale = 1.0;
+    if (json.HasMember("scale"))
+        scale = json["scale"].GetFloat();
+    std::cout << "scale = " << scale << "\n";
+    shared_ptr<Hitable> mesh = make_shared<Mesh>(filename, scale, m_p);
+
     if (json.HasMember("wrapper"))
     {
         for (const auto &wrapper : json["wrapper"].GetArray())
             mesh = parser_wrapper(wrapper, mesh);
     }
-    objects.push_back(mesh);
-    return true;
+    return mesh;
 }
 
-bool Controller::parse_rect(const Value &json)
+shared_ptr<Hitable> Controller::parse_rect(const Value &json)
 {
     string type(json["type"].GetString());
     shared_ptr<Hitable> rect(nullptr);
@@ -236,11 +228,10 @@ bool Controller::parse_rect(const Value &json)
         for (const auto &wrapper : json["wrapper"].GetArray())
             rect = parser_wrapper(wrapper, rect);
     }
-    objects.push_back(rect);
-    return true;
+    return rect;
 }
 
-bool Controller::parse_box(const Value &json)
+shared_ptr<Hitable> Controller::parse_box(const Value &json)
 {
     const Value &left_bottom_info = json["left_bottom"];
     const Value &right_top_info = json["right_top"];
@@ -256,11 +247,10 @@ bool Controller::parse_box(const Value &json)
         for (const auto &wrapper : json["wrapper"].GetArray())
             box = parser_wrapper(wrapper, box);
     }
-    objects.push_back(box);
-    return true;
+    return box;
 }
 
-bool Controller::parse_curve(const Value &json)
+shared_ptr<Hitable> Controller::parse_curve(const Value &json)
 {
     vector<Vector2f> control_points;
     const Value &control_point_info = json["control_point"];
@@ -277,8 +267,7 @@ bool Controller::parse_curve(const Value &json)
         for (const auto &wrapper : json["wrapper"].GetArray())
             curve = parser_wrapper(wrapper, curve);
     }
-    objects.push_back(curve);
-    return true;
+    return curve;
 }
 
 shared_ptr<Material> Controller::parse_material(const Value &json)
@@ -311,6 +300,8 @@ shared_ptr<Material> Controller::parse_material(const Value &json)
         m_p = make_shared<DiffuseLight>(light_color);
         std::cout << "Light color = " << light_color << "\n";
     }
+    else if (type == "null")
+        return nullptr;
     else
     {
         std::cerr << "抱歉，暂时不支持" << type << "\n";
@@ -358,6 +349,7 @@ shared_ptr<Texture> Controller::parse_texture(const Value &json)
     {
         std::cerr << "抱歉，暂时不支持" << texture << "\n";
     }
+    return nullptr;
 }
 
 shared_ptr<Hitable> Controller::parser_wrapper(const Value &json, shared_ptr<Hitable> hitable)
@@ -385,13 +377,19 @@ shared_ptr<Hitable> Controller::parser_wrapper(const Value &json, shared_ptr<Hit
         std::cout << "density = " << density << "\n";
         return make_shared<ConstantMedium>(hitable, density, texture);
     }
+    else if (type == "flip")
+    {
+        std::cout << "flip face\n";
+        return make_shared<FlipFace>(hitable);
+    }
     else
     {
         std::cerr << "抱歉，暂时不支持" << type << "\n";
     }
+    return nullptr;
 }
 
-bool Controller::parse_camera(const rapidjson::Value &camera_info)
+void Controller::parse_camera(const rapidjson::Value &camera_info)
 {
     const Value &look_from_info = camera_info["look_from"];
     const Value &look_at_info = camera_info["look_at"];
@@ -415,4 +413,49 @@ bool Controller::parse_camera(const rapidjson::Value &camera_info)
     std::cout << "weight height ratio = " << w_h_ratio;
     std::cout << ", vfov = " << vfov << ", aperture = " << aperture << ", focus distance = " << focus_d << ", time = ["
               << time_0 << ", " << time_1 << "]\n";
+}
+
+shared_ptr<Hitable> Controller::parse_hitable(const rapidjson::Value &json)
+{
+    shared_ptr<Hitable> hitable(nullptr);
+    auto itr = json.FindMember("name");
+    if (itr == json.MemberEnd())
+    {
+        std::cerr << "场景(scene)解析错误，没有name字段\n";
+    }
+    if (strcmp(itr->value.GetString(), "sphere") == 0)
+    {
+        std::cout << "Parse Sphere\n";
+        hitable = parse_sphere(json);
+        std::cout << split_line;
+    }
+    else if (strcmp(itr->value.GetString(), "box") == 0)
+    {
+        std::cout << "Parse Box\n";
+        hitable = parse_box(json);
+        std::cout << split_line;
+    }
+    else if (strcmp(itr->value.GetString(), "mesh") == 0)
+    {
+        std::cout << "Parse Mesh\n";
+        hitable = parse_mesh(json);
+        std::cout << split_line;
+    }
+    else if (strcmp(itr->value.GetString(), "curve") == 0)
+    {
+        std::cout << "Parse Curve\n";
+        hitable = parse_curve(json);
+        std::cout << split_line;
+    }
+    else if (strcmp(itr->value.GetString(), "rect") == 0)
+    {
+        std::cout << "Parse Rect\n";
+        hitable = parse_rect(json);
+        std::cout << split_line;
+    }
+    else
+    {
+        std::cout << "目前不支持" << itr->value.GetString() << "\n";
+    }
+    return hitable;
 }

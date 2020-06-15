@@ -6,12 +6,16 @@
 #include "Light.hpp"
 #include "Material.hpp"
 #include "Media.hpp"
+#include "PDF.hpp"
 #include "Rect.hpp"
 #include "Sphere.hpp"
 #include "Texture.hpp"
 #include "Transform.hpp"
 #include <ctime>
 #include <vector>
+
+std::random_device _random_device;
+std::default_random_engine _random_engine(_random_device());
 
 float ffmin(float a, float b) { return (a < b) ? a : b; }
 float ffmax(float a, float b) { return (a < b) ? b : a; }
@@ -22,9 +26,10 @@ int imax(int a, int b) { return (a > b) ? a : b; }
     input:
         r——待求交的光线
         world——物体，是一个Hitable
+        fake_light——表明光源的位置、大小，不参与真正的绘制
         depth——递归深度
  ******************************/
-Vector3f color(const Ray &r, shared_ptr<Hitable> world, int depth)
+Vector3f color(const Ray &r, shared_ptr<Hitable> world, shared_ptr<Hitable> sample_list, int depth)
 {
     Hit rec;
     //当交点处的t<0.001的时候，认为不相交，从而能绘出阴影的效果
@@ -34,21 +39,32 @@ Vector3f color(const Ray &r, shared_ptr<Hitable> world, int depth)
         //采用递归的方式
         //有散射的物体本身没有颜色，它的颜色通过其之后的光线射中的位置确定
         //这里的attenuation是反射的系数，它会吸收相应的光线能量
-        Ray reflect_r;
-        Vector3f attenuation;
-        Vector3f emitted = rec.material_p->emitted(rec.u, rec.v, rec.p);
-        if (depth < MAX_DEPTH && rec.material_p->scatter(r, rec, attenuation, reflect_r))
-            return emitted + attenuation * color(reflect_r, world, depth + 1);
+        //最终的颜色为A*s(direction)*color(direction)/p(direction)
+        ScatterRecord scattered;
+        Vector3f emitted = rec.material_p->emitted(rec, rec.u, rec.v, rec.p);
+        if (depth < MAX_DEPTH && rec.material_p->scatter(r, rec, scattered))
+        {
+            if (scattered.is_specular) //如果是镜面反射光线，不能直接对光源采样
+            {
+                return scattered.attenuation * color(scattered.specular_ray, world, sample_list, depth + 1);
+            }
+            else
+            {
+                // (optional By dreamHuang)TODO:可以同时发送多个反射光线，一根去光源，一根反射
+                shared_ptr<PDF> hit_pdf_ptr = make_shared<HitablePDF>(sample_list, rec.p);
+                MixturePDF mix_pdf(hit_pdf_ptr, scattered.pdf_ptr);
+                Ray reflect_r(rec.p, mix_pdf.generate(), r.time());
+                float pdf_val = mix_pdf.value(reflect_r.direction());
+                return emitted + scattered.attenuation * rec.material_p->scattering_pdf(r, rec, reflect_r) *
+                                     color(reflect_r, world, sample_list, depth + 1) / pdf_val;
+            }
+        }
         else
             return emitted;
-        // return 0.5 * Vector3f(rec.normal.x() + 1, rec.normal.y() + 1, rec.normal.z() + 1);
     }
-    // else
-    // Vector3f unit_direction = (r.direction());
-    // float t = 0.5 * (unit_direction.y() + 1.0);
-    // return (1.0 - t) * Vector3f(1.0, 1.0, 1.0) + t * Vector3f(0.5, 0.7, 1.0);
     // return Vector3f(0.15, 0.22, 0.68); //蓝色背景
-    return Vector3f(0, 0, 0);
+    else
+        return Vector3f(0, 0, 0);
 }
 
 shared_ptr<Hitable> generate_scene()
@@ -60,20 +76,20 @@ shared_ptr<Hitable> generate_scene()
     for (int i = -11; i < 11; ++i)
         for (int j = -11; j < 11; ++j)
         {
-            float choosed = get_rand();
-            Vector3f center(i + 0.9 * get_rand(), 0.2, j + 0.9 * get_rand());
+            float choosed = get_frand();
+            Vector3f center(i + 0.9 * get_frand(), 0.2, j + 0.9 * get_frand());
             if ((center - Vector3f(4, 0.2, 0)).length() < 0.9)
                 continue;
             if (choosed < 0.8)
                 list.push_back(make_shared<MovingSphere>(
-                    center, center + Vector3f(0, 0.5 * get_rand(), 0.0), 0, 1, 0.2,
+                    center, center + Vector3f(0, 0.5 * get_frand(), 0.0), 0, 1, 0.2,
                     make_shared<Lambertian>(
-                        Vector3f(get_rand() * get_rand(), get_rand() * get_rand(), get_rand() * get_rand()))));
+                        Vector3f(get_frand() * get_frand(), get_frand() * get_frand(), get_frand() * get_frand()))));
             else if (choosed < 0.95)
                 list.push_back(make_shared<Sphere>(
                     center, 0.2,
-                    make_shared<Metal>(Vector3f(0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1), 0.5 * (get_rand() + 1)),
-                                       0.5 * get_rand())));
+                    make_shared<Metal>(Vector3f(0.5 * (get_frand() + 1), 0.5 * (get_frand() + 1), 0.5 * (get_frand() + 1)),
+                                       0.5 * get_frand())));
             else
                 list.push_back(make_shared<Sphere>(center, 0.2, make_shared<Dielectric>(1.5)));
         }
@@ -180,28 +196,18 @@ Vector3f reflect(const Vector3f &v, const Vector3f &normal)
     input:
         v——入射光
         normal——法向量
-        n——relative——入射光所在介质折射率/另一侧介质折射率
+        n_relative——入射光所在介质折射率/另一侧介质折射率
+        cos_theta——入射角余弦
     output:
         refracted——折射光线
     return:
         是否能够折射
  ******************************/
-bool refract(const Vector3f &v, const Vector3f &normal, float n_relative, Vector3f &refracted)
+Vector3f refract(const Vector3f &v, const Vector3f &normal, float n_relative, float cos_theta)
 {
-    Vector3f unit_v = v.normalized();
-    //入射角为beta
-    float cos_beta = Vector3f::dot(unit_v, normal);
-    //折射角alpha，则discriminant = cos^2(alpha)
-    float discriminant = 1.0 - n_relative * n_relative * (1 - cos_beta * cos_beta);
-    if (discriminant > 0.0)
-    {
-        //能够发生折射，根据折射的关系，利用正弦定理可以推导如下
-        // refracted = n_relative * unit_v - (sqrt(discriminant) + n_relative * cos_beta) * normal;
-        refracted = n_relative * (unit_v - normal * cos_beta) - normal * sqrt(discriminant);
-        return true;
-    }
-    else
-        return false;
+    Vector3f r_out_parallel = n_relative * (v + cos_theta * normal);
+    Vector3f r_out_prep = -sqrt(1.0 - r_out_parallel.squaredLength()) * normal;
+    return r_out_parallel + r_out_prep;
 }
 
 /******************************
@@ -221,11 +227,16 @@ float schlick(float cosine, float ref_idx)
     return r0 + (1 - r0) * pow(1.0 - cosine, 5);
 }
 
-float get_rand()
+float get_frand()
 {
-    static std::default_random_engine engine(time(NULL));
-    static std::uniform_real_distribution<float> dis(0.0, 1.0);
-    return dis(engine);
+    std::uniform_real_distribution<float> dis(0.0, 1.0);
+    return dis(_random_engine);
+}
+
+int get_irand(int low, int high)
+{
+    std::uniform_int_distribution<int> dis(low, high);
+    return dis(_random_engine);
 }
 
 Vector3f random_in_unit_sphere()
@@ -233,9 +244,41 @@ Vector3f random_in_unit_sphere()
     Vector3f point(0, 0, 0);
     do
     {
-        point = 2 * Vector3f(get_rand(), get_rand(), get_rand()) - Vector3f(1, 1, 1);
+        point = 2 * Vector3f(get_frand(), get_frand(), get_frand()) - Vector3f(1, 1, 1);
     } while (point.squaredLength() > 1);
     return point;
+}
+
+Vector3f random_on_unit_sphere()
+{
+    Vector3f point(0, 0, 0);
+    do
+    {
+        point = 2 * Vector3f(get_frand(), get_frand(), get_frand()) - Vector3f(1, 1, 1);
+    } while (point.squaredLength() > 1);
+    return point.normalized();
+}
+
+Vector3f random_cosine_direction()
+{
+    float r1 = get_frand();
+    float r2 = get_frand();
+    float z = sqrtf(1 - r2);
+    float phi = 2.0 * M_PI * r1;
+    float x = cosf(phi) * sqrt(r2);
+    float y = sinf(phi) * sqrt(r2);
+    return Vector3f(x, y, z);
+}
+
+Vector3f random_to_sphere(float radius, float distance_squared)
+{
+    float r1 = get_frand();
+    float r2 = get_frand();
+    float z = 1 + r2 * (sqrt(1 - radius * radius / distance_squared) - 1);
+    float phi = 2 * M_PI * r1;
+    float x = cos(phi) * sqrt(1 - z * z);
+    float y = sin(phi) * sqrt(1 - z * z);
+    return Vector3f(x, y, z);
 }
 
 float degree_to_radian(float degree) //角度制转弧度制

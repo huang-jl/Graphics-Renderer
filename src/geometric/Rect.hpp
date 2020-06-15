@@ -45,6 +45,8 @@ class XZRect : public Hitable
     XZRect(float x_0, float x_1, float z_0, float z_1, float y_, shared_ptr<Material> m_p);
     virtual bool hit(const Ray &r, float t_min, float t_max, Hit &rec) const override;
     virtual bool bounding_box(float t0, float t1, AABB &box) const override;
+    virtual float pdf_value(const Vector3f&o, const Vector3f&dir)const override;
+    virtual Vector3f random(const Vector3f&o)const override;
 
     /*data*/
     float x0, x1, z0, z1, y;

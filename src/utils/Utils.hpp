@@ -2,10 +2,10 @@
 #define UTILS_HPP
 #include <vecmath.h>
 
-#include <random>
 #include <memory>
-using std::shared_ptr;
+#include <random>
 using std::make_shared;
+using std::shared_ptr;
 
 #define MAX_DEPTH 50
 #define EPS 1e-3
@@ -20,7 +20,7 @@ class Hitable;
         world——物体，是一个Hitable list
         depth——递归深度
  ******************************/
-Vector3f color(const Ray &r, shared_ptr<Hitable>world, int depth);
+Vector3f color(const Ray &r, shared_ptr<Hitable> world, shared_ptr<Hitable> fake_light, int depth);
 
 /******************************
  反射的关键函数
@@ -38,12 +38,13 @@ Vector3f reflect(const Vector3f &v, const Vector3f &normal);
         v——入射光
         normal——法向量
         n——relative——入射光所在介质折射率/另一侧介质折射率
+        cos_theta——入射角的余弦
     output:
         refracted——折射光线
     return:
         是否能够折射
  ******************************/
-bool refract(const Vector3f &v, const Vector3f &normal, float n_relative, Vector3f &refracted);
+Vector3f refract(const Vector3f &v, const Vector3f &normal, float n_relative, float cos_theta);
 
 /******************************
  反射比计算函数
@@ -55,18 +56,22 @@ bool refract(const Vector3f &v, const Vector3f &normal, float n_relative, Vector
  ******************************/
 float schlick(float cosine, float ref_idx);
 
-float get_rand();
+float get_frand();
+int get_irand(int low, int high);   //[low, high]
 
 Vector3f random_in_unit_sphere();
+Vector3f random_on_unit_sphere();
+Vector3f random_cosine_direction(); //利用p(direction)=cos(theta)/PI，生成的对半球采样
+Vector3f random_to_sphere(float radius, float distance_squared);
 
 shared_ptr<Hitable> generate_scene();
-shared_ptr<Hitable> two_sphere();//测试纹理
-shared_ptr<Hitable> simple_light();//测试光源
-shared_ptr<Hitable> cornell_box();  //cornell box测试厂家
+shared_ptr<Hitable> two_sphere();   //测试纹理
+shared_ptr<Hitable> simple_light(); //测试光源
+shared_ptr<Hitable> cornell_box();  // cornell box测试厂家
 
-float degree_to_radian(float degree);//角度制转弧度制
+float degree_to_radian(float degree); //角度制转弧度制
 float ffmin(float a, float b);
 float ffmax(float a, float b);
-int imin(int a,int b);
-int imax(int a,int b);
+int imin(int a, int b);
+int imax(int a, int b);
 #endif

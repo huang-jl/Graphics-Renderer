@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     // controller.set_imgae_param(ny, aspect, ns);
     // controller.set_camera_param(look_from, look_at, Vector3f(0, 1, 0), 40, 0.0, focus_d, 0, 1);
     // controller.set_scene(cornell_box());
-    if(argc == 2)
+    if (argc == 2)
     {
         controller.parse(argv[1]);
     }

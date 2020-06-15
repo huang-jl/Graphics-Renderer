@@ -4,7 +4,7 @@
 #include <fstream>
 using std::ifstream;
 
-Mesh::Mesh(const char *filename, shared_ptr<Material> m_p) : Hitable(m_p)
+Mesh::Mesh(const char *filename, float scale, shared_ptr<Material> m_p) : Hitable(m_p)
 {
     std::vector<shared_ptr<Hitable>> triangles;
     ifstream fin(filename, std::ios::in);
@@ -33,6 +33,7 @@ Mesh::Mesh(const char *filename, shared_ptr<Material> m_p) : Hitable(m_p)
                 next = line.find_first_of(' ', next + 1);
                 s = line.substr(current, next - current);
                 sscanf(s.c_str(), "%f", &v[i]);
+                v[i] *= scale;
             }
             vertex.push_back(v);
         }
@@ -46,7 +47,7 @@ Mesh::Mesh(const char *filename, shared_ptr<Material> m_p) : Hitable(m_p)
                 sscanf(s.c_str(), "%d", &index[i]);
             }
             triangles.push_back(
-                make_shared<Triangle>(vertex[index[0]-1], vertex[index[1]-1], vertex[index[2]-1], material_p));
+                make_shared<Triangle>(vertex[index[0] - 1], vertex[index[1] - 1], vertex[index[2] - 1], material_p));
         }
     }
     mesh = make_shared<BVHNode>(triangles, 0, triangles.size(), 0.0, 1.0);

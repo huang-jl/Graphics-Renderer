@@ -31,7 +31,7 @@ bool ConstantMedium::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
         return false;
 
     float distance_in_boundary = (rec2.t - rec1.t) * r.direction().length();
-    float scatter_distance = -log(get_rand()) / density;
+    float scatter_distance = -log(get_frand()) / density;
     if (scatter_distance < distance_in_boundary)
     {
         rec.t = rec1.t + scatter_distance / r.direction().length();

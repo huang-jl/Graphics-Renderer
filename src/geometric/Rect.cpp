@@ -1,4 +1,5 @@
 #include "Rect.hpp"
+#include <cfloat>
 /****************************************
  * XYRect
  ****************************************/
@@ -12,6 +13,8 @@ XYRect::XYRect(float x_0, float x_1, float y_0, float y_1, float z_, shared_ptr<
 
 bool XYRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
 {
+    if (fabs(r.direction().z()) < EPS)
+        return false;
     const float inv_dir = 1.0 / r.direction().z();
     float t = (z - r.origin().z()) * inv_dir; //根据平面的z坐标求出t
     if (t < t_min || t > t_max)
@@ -24,7 +27,7 @@ bool XYRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
     rec.v = (y - y0) / (y1 - y0);
     rec.t = t;
     rec.p = r.point_at_parameter(t);
-    rec.normal = Vector3f(0, 0, inv_dir > 0 ? -1 : 1);
+    rec.set_normal(r, Vector3f(0, 0, 1));
     rec.material_p = material_p;
     return true;
 }
@@ -49,6 +52,8 @@ YZRect::YZRect(float y_0, float y_1, float z_0, float z_1, float x_, shared_ptr<
 
 bool YZRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
 {
+    if (fabs(r.direction().x()) < EPS)
+        return false;
     const float inv_dir = 1.0 / r.direction().x();
     float t = (x - r.origin().x()) * inv_dir; //根据平面的x坐标求出t
     if (t < t_min || t > t_max)
@@ -61,7 +66,7 @@ bool YZRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
     rec.v = (z - z0) / (z1 - z0);
     rec.t = t;
     rec.p = r.point_at_parameter(t);
-    rec.normal = Vector3f(inv_dir > 0 ? -1 : 1, 0, 0);
+    rec.set_normal(r, Vector3f(1, 0, 0));
     rec.material_p = material_p;
     return true;
 }
@@ -86,6 +91,8 @@ XZRect::XZRect(float x_0, float x_1, float z_0, float z_1, float y_, shared_ptr<
 
 bool XZRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
 {
+    if (fabs(r.direction().y()) < EPS)
+        return false;
     const float inv_dir = 1.0 / r.direction().y();
     float t = (y - r.origin().y()) * inv_dir; //根据平面的z坐标求出t
     if (t < t_min || t > t_max)
@@ -98,7 +105,7 @@ bool XZRect::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
     rec.v = (z - z0) / (z1 - z0);
     rec.t = t;
     rec.p = r.point_at_parameter(t);
-    rec.normal = Vector3f(0, inv_dir > 0 ? -1 : 1, 0);
+    rec.set_normal(r, Vector3f(0, 1, 0));
     rec.material_p = material_p;
     return true;
 }
@@ -107,6 +114,26 @@ bool XZRect::bounding_box(float t0, float t1, AABB &box) const
     const float epsilon = 0.001;
     box = AABB(Vector3f(x0, y - epsilon, z0), Vector3f(x1, y + epsilon, z1));
     return true;
+}
+
+float XZRect::pdf_value(const Vector3f &o, const Vector3f &dir) const
+{
+    Hit rec;
+    if (this->hit(Ray(o, dir), EPS, FLT_MAX, rec))
+    {
+        float area = (x1 - x0) * (z1 - z0);
+        float distance_squared = rec.t * rec.t * dir.squaredLength();
+        float cosine = fabs(Vector3f::dot(dir.normalized(), rec.normal));
+        return distance_squared / (cosine * area);
+    }
+    else
+        return 0.0;
+}
+
+Vector3f XZRect::random(const Vector3f &o) const
+{
+    Vector3f random_point(x0 + (x1 - x0) * get_frand(), y, z0 + (z1 - z0) * get_frand());
+    return random_point - o;
 }
 
 /****************************************
