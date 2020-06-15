@@ -10,6 +10,7 @@
 #include "Sphere.hpp"
 #include "Texture.hpp"
 #include "Transform.hpp"
+#include "omp.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -50,17 +51,22 @@ void Controller::generate_pic() const
 {
     int width = w_h_ratio * height;
     std::cout << "Width = " << width << ", Height = " << height << "\n";
-    ofstream output(save_path, std::ios::out | std::ios::trunc);
-    output << "P3\n" << width << " " << height << "\n255\n";
+    //allocate buffer
+    Vector3f **pic_buffer = new Vector3f *[height];
+    for (int i = 0; i < height; ++i)
+        pic_buffer[i] = new Vector3f[width];
     //因为光线是根据(x/width, y/height)生成，从左下为原点
     //但是ppm格式是从左上角开始，因此y需要倒序
-    const int total = width * height;
+    int processed = 0;
+#pragma omp parallel for num_threads(8) schedule(static, 1)
     for (int y = height - 1; y >= 0; --y)
+    {
+#pragma omp atomic
+        processed++;
+#pragma omp critical(stdout)
+        std::cout << "(" << 100 * processed / height << "%)\r" << std::flush;
         for (int x = 0; x < width; ++x)
         {
-            int processed = (height - 1 - y) * width + x;
-            std::cout << "start : " << height - 1 - y << "/" << height << "\t(" << 100 * processed / total << "%)"
-                      << "\r";
             Vector3f col(0, 0, 0);
             Vector3f temp;
             //抗锯齿采样
@@ -83,6 +89,17 @@ void Controller::generate_pic() const
             }
             col = col / float(sample_num);
             col = Vector3f(sqrt(col[0]), sqrt(col[1]), sqrt(col[2])); //使用gamma2校验
+            pic_buffer[y][x] = col;
+        }
+    }
+
+    ofstream output(save_path, std::ios::out | std::ios::trunc);
+    output << "P3\n"
+           << width << " " << height << "\n255\n";
+    for (int y = height - 1; y >= 0; --y)
+        for (int x = 0; x < width; ++x)
+        {
+            const Vector3f &col = pic_buffer[y][x];
             int ir = int(255.99 * col[0]);
             int ig = int(255.99 * col[1]);
             int ib = int(255.99 * col[2]);
@@ -92,6 +109,9 @@ void Controller::generate_pic() const
             // std::cout << ir << " " << ig << " " << ib << "\n";
         }
     output.close();
+    for (int i = 0; i < height; ++i)
+        delete[] pic_buffer[i];
+    delete[] pic_buffer;
 }
 
 bool Controller::parse(const char *filename) //解析表示输入场景的json文件

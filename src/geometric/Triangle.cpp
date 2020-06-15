@@ -45,10 +45,10 @@ bool Triangle::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
     }
 
     // rec.normal = (Vector3f::dot(D, normal) > 0) ? -normal : normal;
-    rec.normal = normal;
     rec.t = t;
     rec.material_p = material_p;
     rec.p = r.point_at_parameter(t);
+    rec.set_normal(r, normal);
 #ifdef DEBUG
     std::cout << "origin = " << r.origin() << " direction = " << D << ", t = " << rec.t << ", normal = " << normal
               << ", point = " << rec.p << "\n";

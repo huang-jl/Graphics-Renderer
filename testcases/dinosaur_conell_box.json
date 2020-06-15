@@ -1,17 +1,17 @@
 {
     "save_path": "./output.ppm",
-    "sample_number": 10,
+    "sample_number": 1000,
     "height": 500,
     "camera": {
         "look_from": [
             85,
             75,
-            -50
+            -70
         ],
         "look_at": [
             90,
             75,
-            20
+            40
         ],
         "focus_d": 5,
         "up": [
@@ -204,10 +204,40 @@
         },
         {
             "name": "mesh",
+            "path": "../OBJ-Models/kitten.50k.obj",
+            "scale": 1.0,
+            "material": {
+                "type": "lambertian",
+                "texture": "constant",
+                "albedo": [
+                    0.96,
+                    0.82,
+                    0.05
+                ]
+            },
+            "wrapper": [
+                {
+                    "type": "rotate",
+                    "degree": 160,
+                    "axis": 1
+                },
+                {
+                    "type": "translate",
+                    "displacement": [
+                        50,
+                        5,
+                        205
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "mesh",
             "path": "../OBJ-Models/fixed.perfect.dragon.100K.0.07.obj",
             "scale": 40,
             "material": {
-                "type": "metal",
+                "type": "dielectric",
+                "refraction_index":1.4,
                 "texture": "constant",
                 "albedo": [
                     0.96,
@@ -225,9 +255,9 @@
                 {
                     "type": "translate",
                     "displacement": [
-                        100,
+                        90,
                         28,
-                        170
+                        110
                     ]
                 }
             ]
