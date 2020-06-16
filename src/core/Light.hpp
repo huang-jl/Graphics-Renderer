@@ -20,8 +20,8 @@ class DiffuseLight : public Material
 {
   public:
     DiffuseLight() {}
-    DiffuseLight(Vector3f a, Vector3f d = Vector3f::ZERO) : emit(make_shared<ConstantTexture>(a)){};
-    DiffuseLight(shared_ptr<Texture> t_p, Vector3f d = Vector3f::ZERO) : emit(t_p) {}
+    DiffuseLight(Vector3f a) : emit(make_shared<ConstantTexture>(a)){};
+    DiffuseLight(shared_ptr<Texture> t_p) : emit(t_p) {}
     //默认没有散射，因为是光源
     virtual bool scatter(const Ray &r_in, const Hit &rec, ScatterRecord&) const override
     {
