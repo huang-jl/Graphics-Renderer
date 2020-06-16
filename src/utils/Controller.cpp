@@ -51,7 +51,7 @@ void Controller::generate_pic() const
 {
     int width = w_h_ratio * height;
     std::cout << "Width = " << width << ", Height = " << height << "\n";
-    //allocate buffer
+    // allocate buffer
     Vector3f **pic_buffer = new Vector3f *[height];
     for (int i = 0; i < height; ++i)
         pic_buffer[i] = new Vector3f[width];
@@ -94,8 +94,7 @@ void Controller::generate_pic() const
     }
 
     ofstream output(save_path, std::ios::out | std::ios::trunc);
-    output << "P3\n"
-           << width << " " << height << "\n255\n";
+    output << "P3\n" << width << " " << height << "\n255\n";
     for (int y = height - 1; y >= 0; --y)
         for (int x = 0; x < width; ++x)
         {
@@ -147,11 +146,42 @@ bool Controller::parse(const char *filename) //解析表示输入场景的json�
             sample_num = itr->value.GetInt();
             std::cout << "sample num = " << sample_num << "\n";
         }
+        else if (strcmp(itr->name.GetString(), "emit_num") == 0)
+        {
+            EMIT_NUM = itr->value.GetInt();
+            std::cout << "emit num = " << EMIT_NUM << "\n";
+        }
+        else if (strcmp(itr->name.GetString(), "alpha") == 0)
+        {
+            ALPHA = itr->value.GetFloat();
+            std::cout << "alpha = " << ALPHA << "\n";
+        }
+        else if (strcmp(itr->name.GetString(), "ppm_depth") == 0)
+        {
+            DEPTH = itr->value.GetInt();
+            std::cout << "ppm depth = " << DEPTH << "\n";
+        }
+        else if (strcmp(itr->name.GetString(), "iter") == 0)
+        {
+            ITER = itr->value.GetInt();
+            std::cout << "iter num = " << ITER << "\n";
+        }
         else if (strcmp(itr->name.GetString(), "camera") == 0) /*相机*/
         {
             const Value &camera_info = itr->value;
             parse_camera(camera_info);
             std::cout << split_line;
+        }
+        else if (strcmp(itr->name.GetString(), "lights") == 0)
+        {
+            std::cout << "Lights\n";
+            const Value&lights_info = itr->value;
+            lights = make_shared<HitableList>();
+            for (auto imp_itr = lights_info.Begin(); imp_itr != lights_info.End(); ++imp_itr)
+            {
+                shared_ptr<Hitable> imp_obj = parse_hitable(*imp_itr);
+                lights->add_hitable(imp_obj);
+            }
         }
         else if (strcmp(itr->name.GetString(), "importance") == 0)
         {

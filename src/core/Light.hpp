@@ -20,8 +20,9 @@ class DiffuseLight : public Material
 {
   public:
     DiffuseLight() {}
-    DiffuseLight(Vector3f a) : emit(make_shared<ConstantTexture>(a)){};
-    DiffuseLight(shared_ptr<Texture> t_p) : emit(t_p) {}
+    DiffuseLight(Vector3f a) : emit(make_shared<ConstantTexture>(a)), brightness(a.length()) {};
+    DiffuseLight(Vector3f a, float brightness_) : emit(make_shared<ConstantTexture>(a)), brightness(brightness_) {};
+    DiffuseLight(shared_ptr<Texture> t_p, float brightness_) : emit(t_p), brightness(brightness_) {}
     //默认没有散射，因为是光源
     virtual bool scatter(const Ray &r_in, const Hit &rec, ScatterRecord&) const override
     {
@@ -36,9 +37,11 @@ class DiffuseLight : public Material
         else
             return Vector3f::ZERO;
     }
+    virtual float get_bright()const { return brightness; } //返回光源的亮度
 
     /*data*/
     shared_ptr<Texture> emit; //用材质的颜色作为光源
+    float brightness;
 };
 
 #endif

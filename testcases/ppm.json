@@ -2,6 +2,10 @@
     "save_path": "./output_2.ppm",
     "sample_number": 10,
     "height": 500,
+    "emit_num": 300000,
+    "iter": 100000,
+    "ppm_depth": 10,
+    "alpha": 0.7,
     "camera": {
         "look_from": [
             278,
@@ -23,7 +27,7 @@
         "w_h_ratio": 1.0,
         "vfov": 40
     },
-    "importance": [
+    "lights": [
         {
             "name": "rect",
             "type": "xz",
@@ -35,20 +39,23 @@
                 554
             ],
             "material": {
-                "type": "null"
-            }
-        },
-        {
-            "name": "sphere",
-            "center": [
-                190,
-                90,
-                190
-            ],
-            "radius": 90,
-            "material": {
-                "type": "null"
-            }
+                "type": "diffuse_light",
+                "color": [
+                    15,
+                    15,
+                    15
+                ],
+                "direction": [
+                    0,
+                    -1,
+                    0
+                ]
+            },
+            "wrapper": [
+                {
+                    "type": "flip"
+                }
+            ]
         }
     ],
     "scene": [

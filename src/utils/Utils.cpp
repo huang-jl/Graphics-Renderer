@@ -16,6 +16,8 @@
 
 std::random_device _random_device;
 std::default_random_engine _random_engine(_random_device());
+std::uniform_real_distribution<float> fdis(0.0, 1.0);
+std::uniform_int_distribution<int> idis(0, INT_MAX);
 
 float ffmin(float a, float b) { return (a < b) ? a : b; }
 float ffmax(float a, float b) { return (a < b) ? b : a; }
@@ -86,10 +88,11 @@ shared_ptr<Hitable> generate_scene()
                     make_shared<Lambertian>(
                         Vector3f(get_frand() * get_frand(), get_frand() * get_frand(), get_frand() * get_frand()))));
             else if (choosed < 0.95)
-                list.push_back(make_shared<Sphere>(
-                    center, 0.2,
-                    make_shared<Metal>(Vector3f(0.5 * (get_frand() + 1), 0.5 * (get_frand() + 1), 0.5 * (get_frand() + 1)),
-                                       0.5 * get_frand())));
+                list.push_back(
+                    make_shared<Sphere>(center, 0.2,
+                                        make_shared<Metal>(Vector3f(0.5 * (get_frand() + 1), 0.5 * (get_frand() + 1),
+                                                                    0.5 * (get_frand() + 1)),
+                                                           0.5 * get_frand())));
             else
                 list.push_back(make_shared<Sphere>(center, 0.2, make_shared<Dielectric>(1.5)));
         }
@@ -227,17 +230,9 @@ float schlick(float cosine, float ref_idx)
     return r0 + (1 - r0) * pow(1.0 - cosine, 5);
 }
 
-float get_frand()
-{
-    std::uniform_real_distribution<float> dis(0.0, 1.0);
-    return dis(_random_engine);
-}
+float get_frand() { return fdis(_random_engine); }
 
-int get_irand(int low, int high)
-{
-    std::uniform_int_distribution<int> dis(low, high);
-    return dis(_random_engine);
-}
+int get_irand(int low, int high) { return idis(_random_engine) % (high - low + 1) + low; }
 
 Vector3f random_in_unit_sphere()
 {

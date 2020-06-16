@@ -15,6 +15,9 @@ class Ray
     Vector3f origin() const { return o; }
     Vector3f direction() const { return dir; }
     Vector3f point_at_parameter(float t) const { return o + t * dir; }
+    void change_dir(const Vector3f &v) { dir = v; }
+    void change_origin(const Vector3f &origin_) { o = origin_; }
+
     float time() const { return time_; }
 
     Vector3f o;

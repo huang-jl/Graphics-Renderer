@@ -37,7 +37,7 @@ class Material
     }; //散射光线的概率密度
     //光源材质需要重写的虚函数，默认材质是不带任何颜色的
     virtual Vector3f emitted(const Hit &rec, float u, float v, Vector3f &p) const { return Vector3f(0, 0, 0); }
-    virtual bool is_diffuse() const = 0;
+    virtual float get_bright()const { return 0; } //返回光源的亮度
 };
 
 class Lambertian : public Material
@@ -67,7 +67,6 @@ class Lambertian : public Material
         scattered.pdf_ptr = make_shared<CosinePDF>(rec.normal); //以法向量为z轴构建坐标系
         return true;
     }
-    virtual bool is_diffuse() const override{return true;}
 
     /*data*/
     // Vector3f albedo; //反射率
@@ -95,7 +94,6 @@ class Metal : public Material
         scattered.pdf_ptr = nullptr;
         return true;
     }
-    virtual bool is_diffuse() const override{return false;}
     /*data*/
     Vector3f albedo;
     float fuzz; //模糊效果
@@ -139,7 +137,6 @@ class Dielectric : public Material
         }
         return true;
     }
-    virtual bool is_diffuse() const override{return false;}
 
     /*index*/
     float ref_idx;
@@ -161,7 +158,6 @@ class Isotropic : public Material
         attenuation = albedo->value(rec.u, rec.v, rec.p);
         return true;
     }
-    virtual bool is_diffuse() const override{return true;}
     /*data*/
     shared_ptr<Texture> albedo; //反射比
 };

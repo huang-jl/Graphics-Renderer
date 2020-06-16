@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <random>
+#include <cfloat>
 using std::make_shared;
 using std::shared_ptr;
 
