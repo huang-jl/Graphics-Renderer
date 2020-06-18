@@ -28,12 +28,6 @@ BVHNode::BVHNode(std::vector<shared_ptr<Hitable>> &l, size_t start, size_t end, 
     {
         int axis = static_cast<int>(3 * get_frand());
         auto comparator = (axis == 0) ? box_x_compare_ : (axis == 1) ? box_y_compare_ : box_z_compare_;
-        // if (axis == 0)
-        //     std::sort(l.begin() + start, l.begin() + end, box_x_compare_);
-        // else if (axis == 1)
-        //     std::sort(l.begin() + start, l.begin() + end, box_y_compare_);
-        // else
-        //     std::sort(l.begin() + start, l.end() + end, box_z_compare_);
         std::sort(l.begin() + start, l.begin() + end, comparator);
         size_t mid = (start + end) / 2;
         left_c = std::make_shared<BVHNode>(l, start, mid, time0, time1);

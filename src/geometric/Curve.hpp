@@ -1,7 +1,8 @@
 #ifndef CURVE_HPP
 #define CURVE_HPP
-#include <BezierFunc.hpp>
-#include <Hitable.hpp>
+
+#include "BezierFunc.hpp"
+#include "Hitable.hpp"
 #include <utility>
 #include <vector>
 /****************************************
@@ -21,12 +22,12 @@ class BezierSurface : public Hitable
     virtual bool hit(const Ray &r, float t_min, float t_max, Hit &rec) const override;
     virtual bool bounding_box(float t0, float t1, AABB &box) const override;
 
-    bool NewtonIter(const Vector3f &origin, const Vector3f &dir, float &t, float &u, float &theta, float tol = 0.01,
+    bool NewtonIter(const Vector3f &origin, const Vector3f &dir, float &t, float &u, float &theta, float tol = EPS,
                     const int MAX_ITER = 50) const;
     /*data*/
     //对应Bezier曲线的多项式
-    Polynomial B_x;
-    Polynomial B_y;
+    Polynomial B_x;     //对应横坐标
+    Polynomial B_y;     //对应纵坐标
     AABB b_box;
 };
 

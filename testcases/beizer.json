@@ -1,6 +1,6 @@
 {
-    "save_path": "./output_cornell.ppm",
-    "sample_number": 10,
+    "save_path": "./output_bezier.ppm",
+    "sample_number": 100,
     "height": 500,
     "camera": {
         "look_from": [
@@ -28,24 +28,12 @@
             "name": "rect",
             "type": "xz",
             "boundary": [
-                213,
-                343,
-                227,
-                332,
+                173,
+                383,
+                207,
+                352,
                 554
             ],
-            "material": {
-                "type": "null"
-            }
-        },
-        {
-            "name": "sphere",
-            "center": [
-                190,
-                90,
-                190
-            ],
-            "radius": 90,
             "material": {
                 "type": "null"
             }
@@ -171,10 +159,10 @@
             "name": "rect",
             "type": "xz",
             "boundary": [
-                213,
-                343,
-                227,
-                332,
+                173,
+                383,
+                207,
+                352,
                 554
             ],
             "material": {
@@ -197,53 +185,22 @@
             ]
         },
         {
-            "name": "sphere",
-            "center": [
-                190,
-                90,
-                190
+            "name":"curve",
+            "control_point":[
+                [0, 0],
+                [47, -5.7],
+                [96, 52.8],
+                [0, 140]
             ],
-            "radius": 90,
-            "material": {
-                "type": "dielectric",
-                "refraction_index": 1.5
-            }
-        },
-        {
-            "name": "box",
-            "left_bottom": [
-                0,
-                0,
-                0
-            ],
-            "right_top": [
-                165,
-                330,
-                165
-            ],
-            "material": {
-                "type": "lambertian",
-                "texture": "constant",
-                "albedo": [
-                    0.8,
-                    0.85,
-                    0.88
-                ],
-                "fuzz": 0
+            "material":{
+                "type":"lambertian",
+                "texture":"constant",
+                "albedo":[0.41, 0.53, 0.9]
             },
-            "wrapper": [
+            "wrapper":[
                 {
-                    "type": "rotate",
-                    "degree": -15,
-                    "axis": 1
-                },
-                {
-                    "type": "translate",
-                    "displacement": [
-                        265,
-                        0,
-                        295
-                    ]
+                    "type":"translate",
+                    "displacement":[240, 120, 240]
                 }
             ]
         }

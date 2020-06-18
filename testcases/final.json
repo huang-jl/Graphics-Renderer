@@ -1,0 +1,193 @@
+{
+    "save_path": "./output_final.ppm",
+    "sample_number": 6500,
+    "height": 1024,
+    "camera": {
+        "look_from": [
+            478,
+            278,
+            -800
+        ],
+        "look_at": [
+            230,
+            178,
+            -30
+        ],
+        "focus_d": 10,
+        "up": [
+            0,
+            1,
+            0
+        ],
+        "aperture": 0.02,
+        "w_h_ratio": 1.0,
+        "vfov": 40,
+        "time":[0, 1]
+    },
+    "importance": [
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                123,
+                423,
+                147,
+                412,
+                554
+            ],
+            "material": {
+                "type": "null"
+            }
+        }
+    ],
+    "scene": [
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                123,
+                423,
+                147,
+                412,
+                554
+            ],
+            "material": {
+                "type": "diffuse_light",
+                "color": [
+                    10,
+                    10,
+                    10
+                ]
+            },
+            "wrapper": [
+                {
+                    "type": "flip"
+                }
+            ]
+        },
+        {
+            "name":"sphere",
+            "center":[120, 230, 170],
+            "radius":80,
+            "material":{
+                "type":"metal",
+                "albedo":[0.749, 0.6784, 0.3353],
+                "fuzz":0.05
+            }
+        },
+        {
+            "name":"sphere",
+            "center":[0, 170, 45],
+            "radius":70,
+            "material":{
+                "type":"metal",
+                "albedo":[0.8, 0.8, 0.9],
+                "fuzz":1
+            }
+        },
+        {
+            "name":"sphere",
+            "moving":true,
+            "center_1":[400, 400, 200],
+            "center_2":[430, 400, 200],
+            "time0":0,
+            "time1":1,
+            "radius":50,
+            "material":{
+                "type":"lambertian",
+                "texture":"constant",
+                "albedo":[0.7, 0.3, 0.1]
+            }
+        },
+        {
+            "name":"sphere",
+            "center":[360, 150, 145],
+            "radius":70,
+            "material":{
+                "type":"dielectric",
+                "refraction_index":1.5
+            }
+        },
+        {
+            "name":"sphere",
+            "center":[360, 150, 145],
+            "radius":70,
+            "material":{
+                "type":"dielectric",
+                "refraction_index":1.5
+            },
+            "wrapper":[
+                {
+                    "type":"medium",
+                    "texture":"constant",
+                    "albedo":[0.2, 0.4, 0.9],
+                    "density":0.2
+                }
+            ]
+        },
+        {
+            "name":"sphere",
+            "center":[0, 0, 0],
+            "radius":5000,
+            "material":{
+                "type":"dielectric",
+                "refraction_index":1.5
+            },
+            "wrapper":[
+                {
+                    "type":"medium",
+                    "texture":"constant",
+                    "albedo":[1, 1, 1],
+                    "density":0.0001
+                }
+            ]
+        },
+        {
+            "name":"sphere",
+            "center":[400, 250, 400],
+            "radius":120,
+            "material":{
+                "type":"lambertian",
+                "texture":"image",
+                "path":"../blue_ice.jpg"
+            }
+        },
+        {
+            "name":"sphere",
+            "center":[220, 280, 300],
+            "radius":80,
+            "material":{
+                "type":"lambertian",
+                "texture":"perlin",
+                "scale":10
+            }
+        },
+        {
+            "name":"random_box"
+        },
+        {
+            "name": "mesh",
+            "path": "../OBJ-Models/fixed.perfect.dragon.100K.0.07.obj",
+            "scale": 110,
+            "material": {
+                "type": "dielectric",
+                "refraction_index":1.4
+            },
+            "wrapper": [
+                {
+                    "type": "rotate",
+                    "degree": 160,
+                    "axis": 1
+                },
+                {
+                    "type": "translate",
+                    "displacement": [
+                        230,
+                        178,
+                        -30
+                    ]
+                }
+            ]
+        }
+    ]
+}

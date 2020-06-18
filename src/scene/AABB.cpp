@@ -2,7 +2,7 @@
 
 bool AABB::hit(const Ray &r, float tmin, float tmax, float *t) const
 {
-    float hit_t = __FLT_MAX__;
+    float hit_t = FLT_MAX;  //和包围盒最近的交点
     for (int axis = 0; axis < 3; ++axis)
     {
         float inv_dir = 1.0 / r.direction()[axis];

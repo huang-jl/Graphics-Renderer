@@ -7,6 +7,7 @@
 #include "Ray.hpp"
 #include "Texture.hpp"
 #include "Utils.hpp"
+#include <typeinfo>
 
 /****************************************
  * 记录散射光线的信息
@@ -36,8 +37,8 @@ class Material
         return 0;
     }; //散射光线的概率密度
     //光源材质需要重写的虚函数，默认材质是不带任何颜色的
-    virtual Vector3f emitted(const Hit &rec, float u, float v, Vector3f &p) const { return Vector3f(0, 0, 0); }
-    virtual float get_bright()const { return 0; } //返回光源的亮度
+    virtual Vector3f emitted(const Hit &rec, float u, float v, const Vector3f &p) const { return Vector3f(0, 0, 0); }
+    virtual float get_bright() const { return 0; } //返回光源的亮度
 };
 
 class Lambertian : public Material
@@ -152,12 +153,18 @@ class Isotropic : public Material
 {
   public:
     Isotropic(shared_ptr<Texture> a) : albedo(a) {}
-    virtual bool scatter(const Ray &r_in, const Hit &rec, Vector3f &attenuation, Ray &scattered) const
+    virtual bool scatter(const Ray &r_in, const Hit &rec, ScatterRecord &scattered) const
     {
-        scattered = Ray(rec.p, random_in_unit_sphere(), r_in.time());
-        attenuation = albedo->value(rec.u, rec.v, rec.p);
+        scattered.attenuation = albedo->value(rec.u, rec.v, rec.p);
+        scattered.is_specular = false;
+        scattered.pdf_ptr = make_shared<UniformPDF>();
+        // scattered.specular_ray = Ray(rec.p, random_in_unit_sphere(), r_in.time());
         return true;
     }
+    virtual float scattering_pdf(const Ray &r_in, const Hit &rec, const Ray &scattered) const
+    {
+        return 1.0;
+    }; //散射光线的概率密度
     /*data*/
     shared_ptr<Texture> albedo; //反射比
 };

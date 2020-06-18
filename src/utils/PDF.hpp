@@ -20,6 +20,14 @@ class PDF
     virtual ~PDF() {}
 };
 
+class UniformPDF : public PDF
+{
+  public:
+    UniformPDF() {}
+    virtual float value(const Vector3f &) const override { return 1.0; }
+    virtual Vector3f generate() const override { return random_in_unit_sphere(); }
+};
+
 /****************************************
  * p(direction) = cos(theta)/M_PI
  * 随机产生一条半球面中的光线（利用极坐标）

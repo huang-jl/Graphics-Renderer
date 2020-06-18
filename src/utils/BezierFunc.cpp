@@ -169,7 +169,7 @@ Polynomial &Polynomial::operator*=(const Polynomial &other)
     return *this;
 }
 
-Polynomial Polynomial::bionomial(float a, float b, int n) //产生一个(a+bx)^n的多项式
+Polynomial Polynomial::bionomial(float a, float b, int n) //产生一个(a+bx)^n的多项式, 10阶以内的Beizer曲线
 {
     assert(n < 11 && n >= 0);
     if (b == 0)

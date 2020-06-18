@@ -17,7 +17,7 @@
 std::random_device _random_device;
 std::default_random_engine _random_engine(_random_device());
 std::uniform_real_distribution<float> fdis(0.0, 1.0);
-std::uniform_int_distribution<int> idis(0, INT_MAX);
+std::uniform_int_distribution<int> idis(0, __INT_MAX__);
 
 float ffmin(float a, float b) { return (a < b) ? a : b; }
 float ffmax(float a, float b) { return (a < b) ? b : a; }
@@ -52,11 +52,13 @@ Vector3f color(const Ray &r, shared_ptr<Hitable> world, shared_ptr<Hitable> samp
             }
             else
             {
-                // (optional By dreamHuang)TODO:可以同时发送多个反射光线，一根去光源，一根反射
+                // (optional By dreamHuang)TODO:可以a时发送多个反射光线，一根去光源，一根反射
                 shared_ptr<PDF> hit_pdf_ptr = make_shared<HitablePDF>(sample_list, rec.p);
                 MixturePDF mix_pdf(hit_pdf_ptr, scattered.pdf_ptr);
                 Ray reflect_r(rec.p, mix_pdf.generate(), r.time());
                 float pdf_val = mix_pdf.value(reflect_r.direction());
+                // Ray reflect_r(rec.p, scattered.pdf_ptr->generate(), r.time());
+                // float pdf_val = scattered.pdf_ptr->value(reflect_r.direction());
                 return emitted + scattered.attenuation * rec.material_p->scattering_pdf(r, rec, reflect_r) *
                                      color(reflect_r, world, sample_list, depth + 1) / pdf_val;
             }
@@ -64,9 +66,11 @@ Vector3f color(const Ray &r, shared_ptr<Hitable> world, shared_ptr<Hitable> samp
         else
             return emitted;
     }
-    // return Vector3f(0.15, 0.22, 0.68); //蓝色背景
     else
         return Vector3f(0, 0, 0);
+    // else
+    // return Vector3f(0.70, 0.80, 1.00);
+    // return Vector3f(0.15, 0.22, 0.68); //蓝色背景
 }
 
 shared_ptr<Hitable> generate_scene()
@@ -116,23 +120,6 @@ shared_ptr<Hitable> two_sphere()
     return make_shared<HitableList>(list);
 }
 
-shared_ptr<Hitable> simple_light() //测试光源
-{
-    std::vector<shared_ptr<Hitable>> list;
-    shared_ptr<Texture> noise_texture = make_shared<NoiseTexture>(3);
-    auto s1 = make_shared<Sphere>(Vector3f(0, -1000, 0), 1000, make_shared<Lambertian>(noise_texture));
-    auto s2 = make_shared<Sphere>(Vector3f(0, 2, 0), 2, make_shared<Lambertian>(noise_texture));
-    auto s3 = make_shared<Sphere>(Vector3f(0, 7, 0), 2,
-                                  make_shared<DiffuseLight>(make_shared<ConstantTexture>(Vector3f(4, 4, 4))));
-    auto s4 =
-        make_shared<XYRect>(3, 5, 1, 3, -2, make_shared<DiffuseLight>(make_shared<ConstantTexture>(Vector3f(4, 4, 4))));
-    list.push_back(s1);
-    list.push_back(s2);
-    list.push_back(s3);
-    list.push_back(s4);
-    return make_shared<HitableList>(list);
-}
-
 shared_ptr<Hitable> cornell_box() // cornell box测试场景
 {
     std::vector<shared_ptr<Hitable>> list;
@@ -140,10 +127,12 @@ shared_ptr<Hitable> cornell_box() // cornell box测试场景
     shared_ptr<Material> white = make_shared<Lambertian>(Vector3f(0.73, 0.73, 0.73));
     shared_ptr<Material> green = make_shared<Lambertian>(Vector3f(0.12, 0.45, 0.15));
     shared_ptr<Material> light = make_shared<DiffuseLight>(Vector3f(7, 7, 7));
+    shared_ptr<Material> perlin = make_shared<Lambertian>(make_shared<NoiseTexture>(2.0));
 
-    shared_ptr<Hitable> box_1 = make_shared<Translate>(
-        make_shared<Rotate>(make_shared<Box>(Vector3f(0, 0, 0), Vector3f(135, 135, 135), white), 40, 1),
-        Vector3f(130, 0, 65));
+    shared_ptr<Hitable> sphere = make_shared<Sphere>(Vector3f(250, 200, 200), 100, perlin);
+    // shared_ptr<Hitable> box_1 = make_shared<Translate>(
+    //     make_shared<Rotate>(make_shared<Box>(Vector3f(0, 0, 0), Vector3f(135, 135, 135), white), 40, 1),
+    //     Vector3f(130, 0, 65));
     // shared_ptr<Hitable> box_2 = make_shared<Translate>(
     //     make_shared<Rotate>(make_shared<Box>(Vector3f(0, 0, 0), Vector3f(165, 330, 165), white), -35, 1),
     //     Vector3f(265, 0, 295));
@@ -169,14 +158,42 @@ shared_ptr<Hitable> cornell_box() // cornell box测试场景
     list.push_back(make_shared<XZRect>(0, 555, 0, 555, 0, white));
     list.push_back(make_shared<XYRect>(0, 555, 0, 555, 555, white));
     list.push_back(make_shared<XZRect>(0, 555, 0, 555, 555, white));
-    list.push_back(box_1);
+    list.push_back(sphere);
     // list.push_back(box_2);
-    std::vector<Vector2f> v{Vector2f(0, 0), Vector2f(47, -5.7), Vector2f(96, 52.8), Vector2f(0, 140)};
-    shared_ptr<BezierSurface> bezier_p = make_shared<BezierSurface>(v, make_shared<Lambertian>(Vector3f(1, 1, 1)));
-    shared_ptr<Translate> t_b = make_shared<Translate>(bezier_p, Vector3f(400, 10, 200));
-    list.push_back(t_b);
+    // std::vector<Vector2f> v{Vector2f(0, 0), Vector2f(47, -5.7), Vector2f(96, 52.8), Vector2f(0, 140)};
+    // shared_ptr<BezierSurface> bezier_p = make_shared<BezierSurface>(v, make_shared<Lambertian>(Vector3f(1, 1, 1)));
+    // shared_ptr<Translate> t_b = make_shared<Translate>(bezier_p, Vector3f(400, 10, 200));
+    // list.push_back(t_b);
     std::cerr << "Init over\n";
     return make_shared<HitableList>(list);
+}
+
+shared_ptr<Hitable> random_box()
+{
+    int nb = 20;
+    const float w = 100;
+    shared_ptr<Material> ground = make_shared<Lambertian>(Vector3f(0.48, 0.83, 0.53));
+    std::vector<shared_ptr<Hitable>> box_lists;
+    for (int i = 0; i < nb; ++i)
+        for (int j = 0; j < nb; ++j)
+        {
+            float x0 = -1000 + i * w;
+            float z0 = -1000 + j * w;
+            float y0 = 0;
+            float x1 = x0 + w;
+            float y1 = 100 * (get_frand() + 0.01);
+            float z1 = z0 + w;
+            if ((i == 11 && j == 9) || (i == 11 && j == 10) || (i == 12 && j == 9) || (i == 12 && j == 10))
+            {
+                y1 = 86;
+            }
+            else if (i == 13 && j == 11)
+            {
+                y1 = 79;
+            }
+            box_lists.push_back(make_shared<Box>(Vector3f(x0, y0, z0), Vector3f(x1, y1, z1), ground));
+        }
+    return make_shared<BVHNode>(box_lists, 0, box_lists.size(), 0, 1);
 }
 
 /******************************
@@ -280,3 +297,5 @@ float degree_to_radian(float degree) //角度制转弧度制
 {
     return degree * M_PI / 180;
 }
+
+bool is_nan(const Vector3f &v) { return (v[0] != v[0] || v[1] != v[1] || v[2] != v[2]); }

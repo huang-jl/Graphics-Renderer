@@ -1,6 +1,7 @@
 #ifndef CONTROLLER_HPP
 #define CONTROLLER_HPP
 #include "Camera.hpp"
+#include "HitableList.hpp"
 #include "rapidjson/document.h"
 
 /****************************************
@@ -27,7 +28,7 @@ class Controller
     float w_h_ratio;
     int sample_num;
     int ITER, DEPTH, EMIT_NUM;
-    float ALPHA;
+    float ALPHA, init_r;
     shared_ptr<Hitable> world;
     shared_ptr<Hitable> sample_list; //直接重点采样的物体
     shared_ptr<HitableList> lights;

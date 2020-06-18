@@ -67,12 +67,13 @@ Vector3f random_to_sphere(float radius, float distance_squared);
 
 shared_ptr<Hitable> generate_scene();
 shared_ptr<Hitable> two_sphere();   //测试纹理
-shared_ptr<Hitable> simple_light(); //测试光源
-shared_ptr<Hitable> cornell_box();  // cornell box测试厂家
+shared_ptr<Hitable> cornell_box(); // cornell box测试场景
+shared_ptr<Hitable> random_box();
 
 float degree_to_radian(float degree); //角度制转弧度制
 float ffmin(float a, float b);
 float ffmax(float a, float b);
 int imin(int a, int b);
 int imax(int a, int b);
+bool is_nan(const Vector3f&);
 #endif

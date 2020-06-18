@@ -2,9 +2,14 @@
 #include <cfloat>
 #include <iostream>
 
+/****************************************
+ * 低阶的Bezier曲线，直接采用定义的方式求
+ * B(t)=C(n,0)*(1-t)^n*t^0*P0 + C(n,1)*(1-t)^(n-1)*t^1*P1+...+C(n,n)*(1-t)^0*t^n*Pn
+ ****************************************/
 BezierSurface::BezierSurface(const std::vector<Vector2f> &points, shared_ptr<Material> m_p)
     : Hitable(m_p), B_x(0), B_y(0)
 {
+    //初始化Bezier曲线的参数方程
     size_t n = points.size() - 1; // Bezier曲线的阶数
     for (int i = 0; i <= n; ++i)
     {
@@ -15,6 +20,8 @@ BezierSurface::BezierSurface(const std::vector<Vector2f> &points, shared_ptr<Mat
     }
     float min_x = FLT_MAX, min_y = FLT_MAX;
     float max_x = -FLT_MAX, max_y = -FLT_MAX;
+
+    //用于求旋转后的包围盒
     for (const auto &point : points)
     {
         min_x = ffmin(min_x, point.x());
@@ -36,9 +43,11 @@ bool BezierSurface::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
     //坐标为(B_x(u)cos o, B_y(u), B_x(u)sin o)
     //光线为(origin.x + t*dir.x, origin.y + t*dir.y, origin.z + t*dir.z)
     //使用牛顿迭代法求解，初始值为光线和层次包围盒交点
+    //其中t表示光线的参数，u表示Bezier曲线的参数，theta表示Bezier曲线的旋转角度
     float t, u = get_frand(), theta;
     if (!b_box.hit(r, t_min, t_max, &t))
         return false;
+    // atan2更加稳定，返回值为[-Pi, Pi]
     theta = atan2(r.origin().z() + r.direction().z() * t, r.origin().x() + r.direction().x() * t);
     if (!NewtonIter(r.origin(), r.direction(), t, u, theta))
         return false;
@@ -64,7 +73,6 @@ bool BezierSurface::bounding_box(float t0, float t1, AABB &box) const
 bool BezierSurface::NewtonIter(const Vector3f &origin, const Vector3f &dir, float &t, float &u, float &theta, float tol,
                                const int MAX_ITER) const
 {
-    const float epsilon = 1e-2;
     for (int i = 0; i < MAX_ITER; ++i)
     {
         float cos_th = cos(theta);
@@ -77,7 +85,7 @@ bool BezierSurface::NewtonIter(const Vector3f &origin, const Vector3f &dir, floa
         Matrix3f J_F(-dir.x(), B_x.derivative(u) * cos_th, -sin_th * Bx_u, -dir.y(), B_y.derivative(u), 0, -dir.z(),
                      B_x.derivative(u) * sin_th, cos_th * Bx_u);
         bool is_singular;
-        Matrix3f J_F_inv = J_F.inverse(&is_singular, 1e-2);
+        Matrix3f J_F_inv = J_F.inverse(&is_singular, tol);
         if (is_singular)
         {
             // std::cerr << "Singular!\n";
@@ -88,17 +96,12 @@ bool BezierSurface::NewtonIter(const Vector3f &origin, const Vector3f &dir, floa
 
         if (fabsf(delta.x()) < tol && fabsf(delta.y()) < tol && fabsf(delta.z()) < tol)
             return true;
-        // if (i == 0)
-        // {
-        //     std::cerr << "t = " << t << ", u = " << u << ", theta = " << theta << "\n";
-        //     std::cerr << "F = " << F << "\n";
-        //     std::cerr << "Delta = " << delta << "\n";
-        // }
         t -= delta.x();
         u -= delta.y();
         theta -= delta.z();
     }
     Vector3f p = origin + t * dir;
-    return fabsf(p.x() - B_x(u) * cos(theta)) < epsilon && fabsf(p.y() - B_y(u)) < epsilon &&
-           fabsf(p.z() - B_x(u) * sin(theta)) < epsilon;
+    //确认最终得到的解是否成立
+    return (fabsf(p.x() - B_x(u) * cos(theta)) < tol) && (fabsf(p.y() - B_y(u)) < tol) &&
+           (fabsf(p.z() - B_x(u) * sin(theta)) < tol);
 }

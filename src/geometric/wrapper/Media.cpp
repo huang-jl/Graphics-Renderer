@@ -1,6 +1,7 @@
 #include "Media.hpp"
 
-ConstantMedium::ConstantMedium(shared_ptr<Hitable> o, float d, shared_ptr<Texture> t) : boundary(o), density(d)
+ConstantMedium::ConstantMedium(shared_ptr<Hitable> o, float d, shared_ptr<Texture> t)
+    : boundary(o), neg_inv_density(-1.0 / d)
 {
     material_p = make_shared<Isotropic>(t);
 }
@@ -19,24 +20,25 @@ bool ConstantMedium::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
      * 4.判断散射距离和|p1-p2|的关系看是否会散射
      */
     Hit rec1, rec2;
-    const float epsilon = 0.001;
     if (!boundary->hit(r, -FLT_MAX, FLT_MAX, rec1))
         return false;
-    if (!boundary->hit(r, rec1.t + epsilon, FLT_MAX, rec2))
+    if (!boundary->hit(r, rec1.t + EPS, FLT_MAX, rec2))
         return false;
     rec1.t = ffmax(rec1.t, t_min); //随机散射区域下界为max{交点1，t_min,0}
-    rec1.t = ffmax(0, rec1.t);
     rec2.t = ffmin(rec2.t, t_max); //随机散射区域上界为min{交点2，t_max}
     if (rec1.t >= rec2.t)
         return false;
+    rec1.t = ffmax(0, rec1.t);
 
-    float distance_in_boundary = (rec2.t - rec1.t) * r.direction().length();
-    float scatter_distance = -log(get_frand()) / density;
+    float ray_length = r.direction().length();
+    float distance_in_boundary = (rec2.t - rec1.t) * ray_length;
+    float scatter_distance = neg_inv_density * log(get_frand());
     if (scatter_distance < distance_in_boundary)
     {
-        rec.t = rec1.t + scatter_distance / r.direction().length();
+        rec.t = rec1.t + scatter_distance / ray_length;
         rec.p = r.point_at_parameter(rec.t);
         rec.normal = Vector3f(1, 0, 0); //不重要的参数，与散射光线无关
+        rec.front_face = true;
         rec.material_p = material_p;
         return true;
     }

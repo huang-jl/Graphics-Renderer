@@ -29,7 +29,7 @@ class ConstantMedium : public Hitable
     virtual bool bounding_box(float t0, float t1, AABB &box) const override;
     /*data*/
     shared_ptr<Hitable> boundary;
-    float density;
+    float neg_inv_density;
 };
 
 #endif

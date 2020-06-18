@@ -51,7 +51,7 @@ class CheckerTexture : public Texture
 class NoiseTexture : public Texture
 {
   public:
-    NoiseTexture(int scale_ = 1) : scale(scale_) {}
+    NoiseTexture(float scale_ = 1.0) : scale(scale_) {}
     virtual Vector3f value(float u, float v, const Vector3f &p) const override
     {
         //采用向量点乘平滑后的柏林噪声输出为(-1,1)，需要映射为(0,1)
@@ -65,17 +65,19 @@ class NoiseTexture : public Texture
          * 这里加了一个初始相位p.x()，会使波纹方向朝向比较一致
          * 可以修改初始相位，使大理石纹理朝着自己期望的方向伸展
          */
-        return 0.5 * (1 + sin(scale * p.x() + 10 * noise.turb_noise(p))) * Vector3f(1, 1, 1);
+        Vector3f point = (p - Vector3f(220, 280, 300)) / 80.0;
+        return 0.5 * (1 + sin(scale * point.z() + 10 * noise.turb(point))) * Vector3f(1, 1, 1);
     }
     /*data*/
     Perlin noise;
-    int scale;
+    float scale;
 };
 
 class ImageTexture : public Texture
 {
   public:
     ImageTexture(unsigned char *pixels, int width, int height) : data(pixels), nx(width), ny(height) {}
+    virtual ~ImageTexture() { delete[] data; }
     virtual Vector3f value(float u, float v, const Vector3f &p) const override
     {
         int i = static_cast<int>(u * nx);

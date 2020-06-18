@@ -46,7 +46,7 @@ class Hitable
 class FlipFace : public Hitable
 {
   public:
-    FlipFace(shared_ptr<Hitable> o) : hitable(o) {}
+    FlipFace(shared_ptr<Hitable> o) : Hitable(o->material_p), hitable(o) {}
     virtual bool hit(const Ray &r, float t_min, float t_max, Hit &rec) const
     {
         if (hitable->hit(r, t_min, t_max, rec))
@@ -58,6 +58,13 @@ class FlipFace : public Hitable
             return false;
     }
     virtual bool bounding_box(float t0, float t1, AABB &box) const { return hitable->bounding_box(t0, t1, box); }
+    //对起点o和随机方向dir，返回其对应的pdf值
+    virtual float pdf_value(const Vector3f &o, const Vector3f &dir) const override
+    {
+        return hitable->pdf_value(o, dir);
+    }
+    //产生一个随机方向，表示散射的光线方向，起点为o
+    virtual Vector3f random(const Vector3f &o) const override { return hitable->random(o); }
 
     /*data*/
     shared_ptr<Hitable> hitable;

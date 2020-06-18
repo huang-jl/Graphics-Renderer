@@ -18,6 +18,13 @@ class Translate : public Hitable
     Translate(shared_ptr<Hitable> o, const Vector3f &displacement);
     virtual bool hit(const Ray &r, float t_min, float t_max, Hit &rec) const override;
     virtual bool bounding_box(float t0, float t1, AABB &box) const override;
+    //对起点o和随机方向dir，返回其对应的pdf值
+    virtual float pdf_value(const Vector3f &o, const Vector3f &dir) const override
+    {
+        return object->pdf_value(o - offset, dir - offset);
+    }
+    //产生一个随机方向，表示散射的光线方向，起点为o
+    virtual Vector3f random(const Vector3f &o) const override { return object->random(o - offset); }
     /*data*/
     shared_ptr<Hitable> object;
     Vector3f offset;
@@ -40,7 +47,14 @@ class Rotate : public Hitable
     virtual bool hit(const Ray &r, float t_min, float t_max, Hit &rec) const override;
 
     virtual bool bounding_box(float t0, float t1, AABB &box) const override;
-    void rotate(float&a, float &b, bool reverse=false)const;
+    void rotate(float &a, float &b, bool reverse = false) const;
+    //对起点o和随机方向dir，返回其对应的pdf值
+    virtual float pdf_value(const Vector3f &o, const Vector3f &dir) const override
+    {
+        return object->pdf_value(axial_rotate(o), axial_rotate(dir));
+    }
+    //产生一个随机方向，表示散射的光线方向，起点为o
+    virtual Vector3f random(const Vector3f &o) const override { return object->random(axial_rotate(o)); }
 
     /*data*/
     shared_ptr<Hitable> object;

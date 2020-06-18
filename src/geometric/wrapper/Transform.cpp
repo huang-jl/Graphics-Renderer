@@ -3,7 +3,10 @@
 /****************************************
  * Translate
  ****************************************/
-Translate::Translate(shared_ptr<Hitable> o, const Vector3f &displacement) : object(o), offset(displacement) {}
+Translate::Translate(shared_ptr<Hitable> o, const Vector3f &displacement)
+    : Hitable(o->material_p), object(o), offset(displacement)
+{
+}
 
 bool Translate::hit(const Ray &r, float t_min, float t_max, Hit &rec) const
 {
@@ -37,7 +40,7 @@ bool Translate::bounding_box(float t0, float t1, AABB &box) const
  * Rotate
  ****************************************/
 Rotate::Rotate(shared_ptr<Hitable> o, float rotate_degree, int rotate_axis)
-    : object(o), theta(degree_to_radian(rotate_degree)), axis(rotate_axis)
+    : Hitable(o->material_p), object(o), theta(degree_to_radian(rotate_degree)), axis(rotate_axis)
 {
     cos_theta = cos(theta);
     sin_theta = sin(theta);

@@ -1,0 +1,56 @@
+{
+    "save_path": "./output_perlin.ppm",
+    "sample_number": 10,
+    "height": 500,
+    "camera": {
+        "look_from": [
+            50,
+            50,
+            600
+        ],
+        "look_at": [
+            0,
+            50,
+            200
+        ],
+        "focus_d": 10,
+        "up": [
+            0,
+            1,
+            0
+        ],
+        "aperture": 0,
+        "w_h_ratio": 1.0,
+        "vfov": 50
+    },
+    "scene": [
+        {
+            "name": "sphere",
+            "center": [
+                0,
+                80,
+                200
+            ],
+            "radius": 80,
+            "material": {
+                "type": "lambertian",
+                "texture": "perlin",
+                "scale": 6
+            }
+        },
+        {
+            "name": "sphere",
+            "center": [
+                0,
+                -3000,
+                200
+            ],
+            "radius": 3000,
+            "material": {
+                "type": "lambertian",
+                "texture": "perlin",
+                "scale": 6
+            }
+        }
+    ]
+}

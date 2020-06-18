@@ -49,6 +49,7 @@ void Controller::set_scene(shared_ptr<Hitable> world_) { world = world_; }
 
 void Controller::generate_pic() const
 {
+    double begin_time = omp_get_wtime();
     int width = w_h_ratio * height;
     std::cout << "Width = " << width << ", Height = " << height << "\n";
     // allocate buffer
@@ -74,8 +75,8 @@ void Controller::generate_pic() const
             {
                 //这个地方很重要，将(u,v)映射为(0,1)范围，这样nx和ny
                 //就只是图像的一个大小比例，而不会影响图像的显示范围
-                float u = float(x + get_frand()) / float(width);
-                float v = float(y + get_frand()) / float(height);
+                float u = float(x + get_frand()) / float(width - 1);
+                float v = float(y + get_frand()) / float(height - 1);
                 Ray r = camera.get_ray(u, v);
                 temp = color(r, world, sample_list, 0);
 #ifdef DEBUG
@@ -111,6 +112,9 @@ void Controller::generate_pic() const
     for (int i = 0; i < height; ++i)
         delete[] pic_buffer[i];
     delete[] pic_buffer;
+    double elapsed_time = omp_get_wtime() - begin_time;
+    std::cout << "\nTotal time = " << elapsed_time << " s\t avg = " << elapsed_time / static_cast<double>(sample_num)
+              << " s\n";
 }
 
 bool Controller::parse(const char *filename) //解析表示输入场景的json文件
@@ -172,15 +176,21 @@ bool Controller::parse(const char *filename) //解析表示输入场景的json�
             parse_camera(camera_info);
             std::cout << split_line;
         }
+        else if (strcmp(itr->name.GetString(), "init_radius") == 0) /*相机*/
+        {
+            init_r = itr->value.GetFloat();
+            std::cout << "ppm init radius = " << init_r << "\n";
+        }
         else if (strcmp(itr->name.GetString(), "lights") == 0)
         {
             std::cout << "Lights\n";
-            const Value&lights_info = itr->value;
+            const Value &lights_info = itr->value;
             lights = make_shared<HitableList>();
             for (auto imp_itr = lights_info.Begin(); imp_itr != lights_info.End(); ++imp_itr)
             {
                 shared_ptr<Hitable> imp_obj = parse_hitable(*imp_itr);
                 lights->add_hitable(imp_obj);
+                std::cout << "Brightness = " << imp_obj->material_p->get_bright() << "\n";
             }
         }
         else if (strcmp(itr->name.GetString(), "importance") == 0)
@@ -213,13 +223,28 @@ bool Controller::parse(const char *filename) //解析表示输入场景的json�
 
 shared_ptr<Hitable> Controller::parse_sphere(const Value &json)
 {
-    const Value &center_info = json["center"];
-    Vector3f center = create_from_json_array(center_info);
-    float radius = json["radius"].GetFloat();
-    std::cout << "center = " << center << ", raduis = " << radius << "\n";
-
+    shared_ptr<Hitable> sphere;
     shared_ptr<Material> m_p = parse_material(json["material"]);
-    shared_ptr<Hitable> sphere = make_shared<Sphere>(center, radius, m_p);
+    if (json.HasMember("moving"))
+    {
+        const Value &center_info_1 = json["center_1"];
+        const Value &center_info_2 = json["center_2"];
+        Vector3f center_1 = create_from_json_array(center_info_1);
+        Vector3f center_2 = create_from_json_array(center_info_2);
+        float radius = json["radius"].GetFloat();
+        float t0 = json["time0"].GetFloat();
+        float t1 = json["time1"].GetFloat();
+        std::cout << "center_1 = " << center_1 << ", center_2 = " << center_2 << ", raduis = " << radius << "\n";
+        sphere = make_shared<MovingSphere>(center_1, center_2, t0, t1, radius, m_p);
+    }
+    else
+    {
+        const Value &center_info = json["center"];
+        Vector3f center = create_from_json_array(center_info);
+        float radius = json["radius"].GetFloat();
+        std::cout << "center = " << center << ", raduis = " << radius << "\n";
+        sphere = make_shared<Sphere>(center, radius, m_p);
+    }
 
     if (json.HasMember("wrapper"))
     {
@@ -252,12 +277,12 @@ shared_ptr<Hitable> Controller::parse_rect(const Value &json)
     string type(json["type"].GetString());
     shared_ptr<Hitable> rect(nullptr);
     const Value &bounding = json["boundary"];
+    assert(bounding.IsArray());
     std::cout << "type = " << type << " : ";
     std::cout << bounding[0].GetFloat() << ", " << bounding[1].GetFloat() << ", " << bounding[2].GetFloat() << ", "
               << bounding[3].GetFloat() << ", " << bounding[4].GetFloat() << "\n";
 
     shared_ptr<Material> m_p = parse_material(json["material"]);
-    assert(bounding.IsArray());
     if (type == "xy")
     {
         rect = make_shared<XYRect>(bounding[0].GetFloat(), bounding[1].GetFloat(), bounding[2].GetFloat(),
@@ -383,7 +408,7 @@ shared_ptr<Texture> Controller::parse_texture(const Value &json)
     }
     else if (texture == "perlin")
     {
-        const float scale = json["scale"].GetFloat();
+        float scale = json["scale"].GetFloat();
         std::cout << "scale = " << scale << "\n";
         return make_shared<NoiseTexture>(scale);
     }
@@ -420,7 +445,7 @@ shared_ptr<Hitable> Controller::parser_wrapper(const Value &json, shared_ptr<Hit
         std::cout << "degree = " << degree << ", axis = " << axis << "\n";
         return make_shared<Rotate>(hitable, degree, axis);
     }
-    else if (type == "media")
+    else if (type == "medium")
     {
         shared_ptr<Texture> texture = parse_texture(json);
         const float density = json["density"].GetFloat();
@@ -501,6 +526,12 @@ shared_ptr<Hitable> Controller::parse_hitable(const rapidjson::Value &json)
     {
         std::cout << "Parse Rect\n";
         hitable = parse_rect(json);
+        std::cout << split_line;
+    }
+    else if (strcmp(itr->value.GetString(), "random_box") == 0)
+    {
+        std::cout << "Random Box\n";
+        hitable = random_box();
         std::cout << split_line;
     }
     else

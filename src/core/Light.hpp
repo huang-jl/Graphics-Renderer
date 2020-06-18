@@ -30,7 +30,7 @@ class DiffuseLight : public Material
     }
 
     //根据材质的颜色发光
-    virtual Vector3f emitted(const Hit &rec, float u, float v, Vector3f &p) const override
+    virtual Vector3f emitted(const Hit &rec, float u, float v,const Vector3f &p) const override
     {
         if(rec.front_face)
             return emit->value(u, v, p);

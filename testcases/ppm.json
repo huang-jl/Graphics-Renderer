@@ -1,11 +1,12 @@
 {
-    "save_path": "./output_2.ppm",
-    "sample_number": 10,
+    "save_path": "./output_ppm.ppm",
+    "sample_number": 5,
     "height": 500,
     "emit_num": 300000,
-    "iter": 100000,
-    "ppm_depth": 10,
+    "iter": 200,
+    "ppm_depth": 20,
     "alpha": 0.7,
+    "init_radius": 4,
     "camera": {
         "look_from": [
             278,
@@ -44,11 +45,6 @@
                     15,
                     15,
                     15
-                ],
-                "direction": [
-                    0,
-                    -1,
-                    0
                 ]
             },
             "wrapper": [
@@ -175,35 +171,6 @@
             ]
         },
         {
-            "name": "rect",
-            "type": "xz",
-            "boundary": [
-                213,
-                343,
-                227,
-                332,
-                554
-            ],
-            "material": {
-                "type": "diffuse_light",
-                "color": [
-                    15,
-                    15,
-                    15
-                ],
-                "direction": [
-                    0,
-                    -1,
-                    0
-                ]
-            },
-            "wrapper": [
-                {
-                    "type": "flip"
-                }
-            ]
-        },
-        {
             "name": "sphere",
             "center": [
                 190,
@@ -241,13 +208,13 @@
             "wrapper": [
                 {
                     "type": "rotate",
-                    "degree": -15,
+                    "degree": -10,
                     "axis": 1
                 },
                 {
                     "type": "translate",
                     "displacement": [
-                        265,
+                        225,
                         0,
                         295
                     ]

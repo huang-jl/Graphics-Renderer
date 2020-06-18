@@ -4,38 +4,82 @@
     "height": 500,
     "camera": {
         "look_from": [
-            0.5,
-            2,
-            -2
+            478,
+            278,
+            -800
         ],
         "look_at": [
-            0.5,
-            0.5,
+            278,
+            278,
             0
         ],
-        "focus_d": 1,
+        "focus_d": 10,
         "up": [
             0,
             1,
             0
         ],
-        "apeture": 0,
+        "aperture": 0,
         "w_h_ratio": 1.0,
-        "vfov": 40
+        "vfov": 40,
+        "time": [
+            0,
+            1
+        ]
     },
+    "importance": [
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                123,
+                423,
+                147,
+                412,
+                554
+            ],
+            "material": {
+                "type": "null"
+            }
+        }
+    ],
     "scene": [
+        {
+            "name": "rect",
+            "type": "xz",
+            "boundary": [
+                123,
+                423,
+                147,
+                412,
+                554
+            ],
+            "material": {
+                "type": "diffuse_light",
+                "color": [
+                    10,
+                    10,
+                    10
+                ]
+            },
+            "wrapper": [
+                {
+                    "type": "flip"
+                }
+            ]
+        },
         {
             "name": "sphere",
             "center": [
-                0.5,
-                0.5,
-                0.5
+                270,
+                250,
+                250
             ],
-            "radius": 1.0,
+            "radius": 120,
             "material": {
-                "type": "lambertian",
-                "texture": "image",
-                "path": "../texture.jpg"
+                    "type": "lambertian",
+                    "texture": "image",
+                    "path": "../blue_ice.jpg"
             }
         }
     ]
