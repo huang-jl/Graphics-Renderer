@@ -1,6 +1,6 @@
 {
     "save_path": "./output_bezier.ppm",
-    "sample_number": 100,
+    "sample_number": 500,
     "height": 500,
     "camera": {
         "look_from": [
@@ -186,21 +186,19 @@
         },
         {
             "name":"curve",
-            "control_point":[
-                [0, 0],
-                [47, -5.7],
-                [96, 52.8],
-                [0, 140]
+            "control_points":[
+                [0,0], [77, 0], [126.25, 0], [31.5, 40.5], [-31.25, 77.25], [24, 104], [46, 144.25], [18.75, 144.25],[0, 144.25]
             ],
             "material":{
-                "type":"lambertian",
+                "type":"metal",
+                "fuzz":0.2,
                 "texture":"constant",
-                "albedo":[0.41, 0.53, 0.9]
+                "albedo":[0.917, 0.7804, 0.5294]
             },
             "wrapper":[
                 {
                     "type":"translate",
-                    "displacement":[240, 120, 240]
+                    "displacement":[260, 200, 150]
                 }
             ]
         }

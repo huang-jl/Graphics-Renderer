@@ -20,6 +20,9 @@ IF(OPENMP_FOUND)
     message(${OpenMP_CXX_FLAGS})
 ENDIF()
 
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+message(${CMAKE_CXX_FLAGS})
+
 set(LIBS core geometric scene utils)
 
 ADD_SUBDIRECTORY(deps/vecmath)

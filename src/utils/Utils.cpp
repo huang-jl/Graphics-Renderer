@@ -172,7 +172,8 @@ shared_ptr<Hitable> random_box()
 {
     int nb = 20;
     const float w = 100;
-    shared_ptr<Material> ground = make_shared<Lambertian>(Vector3f(0.48, 0.83, 0.53));
+    shared_ptr<Material> ground_red = make_shared<Lambertian>(Vector3f(0.83, 0.361, 0.361));
+    shared_ptr<Material> ground_green = make_shared<Lambertian>(Vector3f(0.48, 0.83, 0.53));
     std::vector<shared_ptr<Hitable>> box_lists;
     for (int i = 0; i < nb; ++i)
         for (int j = 0; j < nb; ++j)
@@ -183,14 +184,19 @@ shared_ptr<Hitable> random_box()
             float x1 = x0 + w;
             float y1 = 100 * (get_frand() + 0.01);
             float z1 = z0 + w;
-            if ((i == 11 && j == 9) || (i == 11 && j == 10) || (i == 12 && j == 9) || (i == 12 && j == 10))
+            if ((i == 11 || i == 12) && (j == 7 || j == 8))
             {
-                y1 = 86;
+                y1 = 80;
             }
-            else if (i == 13 && j == 11)
+            else if (i == 13 && j == 8)
             {
-                y1 = 79;
+                y1 = 25;
             }
+            else if ((i == 13 || i == 14) && (j == 9 || j == 8))
+            {
+                y1 = 90;
+            }
+            shared_ptr<Material> ground = (get_irand(0, 1) == 0) ? ground_red : ground_green;
             box_lists.push_back(make_shared<Box>(Vector3f(x0, y0, z0), Vector3f(x1, y1, z1), ground));
         }
     return make_shared<BVHNode>(box_lists, 0, box_lists.size(), 0, 1);

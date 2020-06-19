@@ -147,28 +147,17 @@
             }
         },
         {
-            "name": "mesh",
-            "path": "../OBJ-Models/cube.obj",
+            "name": "sphere",
+            "center": [
+                190,
+                90,
+                190
+            ],
+            "radius": 90,
             "material": {
-                "type": "lambertian",
-                "texture": "constant",
-                "albedo": [
-                    0.7,
-                    0.12,
-                    0.21
-                ],
-                "fuzz": 0.2
-            },
-            "wrapper": [
-                {
-                    "type": "translate",
-                    "displacement": [
-                        0.5,
-                        0,
-                        0.7
-                    ]
-                }
-            ]
+                "type": "dielectric",
+                "refraction_index": 1.5
+            }
         }
     ]
 }

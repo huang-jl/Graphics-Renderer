@@ -1,9 +1,9 @@
 {
     "save_path": "./output_ppm.ppm",
     "sample_number": 5,
-    "height": 500,
+    "height": 1024,
     "emit_num": 300000,
-    "iter": 200,
+    "iter": 15,
     "ppm_depth": 20,
     "alpha": 0.7,
     "init_radius": 4,
@@ -157,7 +157,8 @@
             ],
             "material": {
                 "type": "lambertian",
-                "texture": "constant",
+                "texture": "image",
+                "path":"../coorful-flowers.jpg",
                 "albedo": [
                     0.73,
                     0.73,
@@ -171,52 +172,27 @@
             ]
         },
         {
-            "name": "sphere",
-            "center": [
-                190,
-                90,
-                190
-            ],
-            "radius": 90,
+            "name": "mesh",
+            "path": "../OBJ-Models/fixed.perfect.dragon.100K.0.07.obj",
+            "scale": 180,
             "material": {
-                "type": "dielectric",
-                "refraction_index": 1.5
-            }
-        },
-        {
-            "name": "box",
-            "left_bottom": [
-                0,
-                0,
-                0
-            ],
-            "right_top": [
-                165,
-                330,
-                165
-            ],
-            "material": {
-                "type": "lambertian",
-                "texture": "constant",
-                "albedo": [
-                    0.8,
-                    0.85,
-                    0.88
-                ],
-                "fuzz": 0
+                "type": "metal",
+                "albedo":[0.999, 0.843, 0.05],
+                "fuzz":0.05,
+                "refraction_index":1.4
             },
             "wrapper": [
                 {
                     "type": "rotate",
-                    "degree": -10,
+                    "degree": 160,
                     "axis": 1
                 },
                 {
                     "type": "translate",
                     "displacement": [
-                        225,
-                        0,
-                        295
+                        230,
+                        130,
+                        200
                     ]
                 }
             ]

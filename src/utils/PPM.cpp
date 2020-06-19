@@ -39,6 +39,7 @@ PPM::~PPM()
 
 void PPM::run()
 {
+    double start = omp_get_wtime();
 /*1.先做光线追踪*/
 #pragma omp parallel for num_threads(THREADS_NUM) schedule(static, 1)
     for (int y = 0; y < height; ++y)
@@ -88,9 +89,15 @@ void PPM::run()
         //更新
 
         // for (HitPoint &view_point : view_points)
+        // int query = 0;
 #pragma omp parallel for num_threads(THREADS_NUM) schedule(static, 1)
         for (int i = 0; i < view_points.size(); ++i)
         {
+            // #pragma omp atomic
+            //             query++;
+            // #pragma omp critical(stdcout)
+            //             if (query % 10000 == 0)
+            //                 std::cout << "Query = " << query << "\r" << std::flush;
             // update(view_point);
             HitPoint &view_point = view_points[i];
             std::vector<const Photon *> res;
@@ -123,9 +130,11 @@ void PPM::run()
         min_radius = ffmin(min_radius, view_point.current_r);
         max_radius = ffmax(max_radius, view_point.current_r);
     }
+    double elapsed = omp_get_wtime() - start;
     std::cout << "min_radius = " << min_radius << " max_radius = " << max_radius << "\n";
     for (int i = 0; i < 10; ++i)
         std::cout << "radius = " << view_points[i * 5000 + get_irand(0, 500)].current_r << "\n";
+    std::cout << "Total time = " << elapsed << " s, avg = " << elapsed / ITER << " s\n";
 }
 
 void PPM::ray_tracing(const Ray &r_init, int x, int y)
@@ -144,7 +153,7 @@ void PPM::ray_tracing(const Ray &r_init, int x, int y)
                  (light_hit && world_hit && rec_light.t < rec_world.t)) //只命中灯或者先命中灯
         {
 #pragma omp critical(lights)
-            pic[y][x] += rec_light.material_p->emitted(rec_light, rec_light.u, rec_light.v, rec_light.p);
+            pic[y][x] += color * rec_light.material_p->emitted(rec_light, rec_light.u, rec_light.v, rec_light.p);
             break;
         }
         else
@@ -289,32 +298,73 @@ Vector3f node_max(KDNode *a, KDNode *b)
     return Vector3f(ffmax(a->max.x(), b->max.x()), ffmax(a->max.y(), b->max.y()), ffmax(a->max.z(), b->max.z()));
 }
 
+// void KDNode::query(HitPoint &view_point, std::vector<const Photon *> &res) const
+// {
+//     //查找和view_point距离小于r的
+//     float dx, dy, dz;
+//     const Vector3f &point = view_point.hit_pos;
+//     if (point.x() < max.x() && point.x() > min.x())
+//         dx = 0.f;
+//     else
+//         dx = ffmin(fabs(point.x() - min.x()), fabs(point.x() - max.x()));
+//     if (point.y() < max.y() && point.y() > min.y())
+//         dy = 0.f;
+//     else
+//         dy = ffmin(fabs(point.y() - min.y()), fabs(point.y() - max.y()));
+//     if (point.z() < max.z() && point.z() > min.z())
+//         dz = 0.f;
+//     else
+//         dz = ffmin(fabs(point.z() - min.z()), fabs(point.z() - max.z()));
+
+//     float radius2 = view_point.current_r * view_point.current_r;
+//     if (dx * dx + dy * dy + dz * dz > radius2)
+//         return;
+//     if ((value.pos - point).squaredLength() < radius2)
+//         res.push_back(&value);
+//     /*递归*/
+//     if (lc)
+//         lc->query(view_point, res);
+//     if (rc)
+//         rc->query(view_point, res);
+// }
+
+//迭代式查找
 void KDNode::query(HitPoint &view_point, std::vector<const Photon *> &res) const
 {
     //查找和view_point距离小于r的
-    float dx, dy, dz;
+    const float radius2 = view_point.current_r * view_point.current_r;
     const Vector3f &point = view_point.hit_pos;
-    if (point.x() < max.x() && point.x() > min.x())
-        dx = 0.f;
-    else
-        dx = ffmin(fabs(point.x() - min.x()), fabs(point.x() - max.x()));
-    if (point.y() < max.y() && point.y() > min.y())
-        dy = 0.f;
-    else
-        dy = ffmin(fabs(point.y() - min.y()), fabs(point.y() - max.y()));
-    if (point.z() < max.z() && point.z() > min.z())
-        dz = 0.f;
-    else
-        dz = ffmin(fabs(point.z() - min.z()), fabs(point.z() - max.z()));
+    float dx, dy, dz;
+    std::stack<const KDNode *> stack;
+    stack.push(this);
+    while (!stack.empty())
+    {
+        //出栈
+        const KDNode *v = stack.top();
+        stack.pop();
 
-    float radius2 = view_point.current_r * view_point.current_r;
-    if (dx * dx + dy * dy + dz * dz > radius2)
-        return;
-    if ((value.pos - point).squaredLength() < radius2)
-        res.push_back(&value);
-    /*递归*/
-    if (lc)
-        lc->query(view_point, res);
-    if (rc)
-        rc->query(view_point, res);
+        if (point[0] > v->min[0] && point[0] < v->max[0])
+            dx = 0.0;
+        else
+            dx = ffmin(fabsf(point[0] - v->min[0]), fabsf(point[0] - v->max[0]));
+
+        if (point[1] > v->min[1] && point[1] < v->max[1])
+            dy = 0.0;
+        else
+            dy = ffmin(fabsf(point[1] - v->min[1]), fabsf(point[1] - v->max[1]));
+
+        if (point[2] > v->min[2] && point[2] < v->max[2])
+            dz = 0.0;
+        else
+            dz = ffmin(fabsf(point[2] - v->min[2]), fabsf(point[2] - v->max[2]));
+
+        if (dx * dx + dy * dy + dz * dz > radius2)
+            continue;
+        if ((point - v->value.pos).squaredLength() < radius2)
+            res.push_back(&v->value);
+        if (v->rc)
+            stack.push(v->rc);
+        if (v->lc)
+            stack.push(v->lc);
+    }
 }

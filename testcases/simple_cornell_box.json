@@ -1,6 +1,6 @@
 {
     "save_path": "./output_cornell.ppm",
-    "sample_number": 10,
+    "sample_number": 100,
     "height": 500,
     "camera": {
         "look_from": [

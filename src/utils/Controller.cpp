@@ -59,7 +59,7 @@ void Controller::generate_pic() const
     //因为光线是根据(x/width, y/height)生成，从左下为原点
     //但是ppm格式是从左上角开始，因此y需要倒序
     int processed = 0;
-#pragma omp parallel for num_threads(8) schedule(static, 1)
+#pragma omp parallel for num_threads(8) schedule(dynamic, 1)
     for (int y = height - 1; y >= 0; --y)
     {
 #pragma omp atomic
@@ -328,7 +328,7 @@ shared_ptr<Hitable> Controller::parse_box(const Value &json)
 shared_ptr<Hitable> Controller::parse_curve(const Value &json)
 {
     vector<Vector2f> control_points;
-    const Value &control_point_info = json["control_point"];
+    const Value &control_point_info = json["control_points"];
     for (const auto &point : control_point_info.GetArray())
     {
         control_points.emplace_back(point[0].GetFloat(), point[1].GetFloat());

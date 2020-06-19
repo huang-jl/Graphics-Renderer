@@ -1,7 +1,12 @@
 {
-    "save_path": "./output_final.ppm",
-    "sample_number": 4300,
-    "height": 1024,
+    "save_path": "./output_ppm.ppm",
+    "sample_number": 1,
+    "height": 100,
+    "emit_num": 30000,
+    "iter": 2,
+    "ppm_depth": 20,
+    "alpha": 0.7,
+    "init_radius": 4,
     "camera": {
         "look_from": [
             478,
@@ -10,7 +15,7 @@
         ],
         "look_at": [
             230,
-            218,
+            178,
             -30
         ],
         "focus_d": 10,
@@ -19,44 +24,28 @@
             1,
             0
         ],
-        "aperture": 0,
+        "aperture": 0.0,
         "w_h_ratio": 1.0,
         "vfov": 40,
         "time":[0, 1]
     },
-    "importance": [
+    "lights": [
         {
             "name": "rect",
             "type": "xz",
             "boundary": [
                 123,
                 423,
-                97,
-                362,
-                554
-            ],
-            "material": {
-                "type": "null"
-            }
-        }
-    ],
-    "scene": [
-        {
-            "name": "rect",
-            "type": "xz",
-            "boundary": [
-                123,
-                423,
-                97,
-                362,
+                147,
+                412,
                 554
             ],
             "material": {
                 "type": "diffuse_light",
                 "color": [
-                    7,
-                    7,
-                    7
+                    10,
+                    10,
+                    10
                 ]
             },
             "wrapper": [
@@ -64,10 +53,12 @@
                     "type": "flip"
                 }
             ]
-        },
+        }
+    ],
+    "scene": [
         {
             "name":"sphere",
-            "center":[100, 230, 170],
+            "center":[120, 230, 170],
             "radius":80,
             "material":{
                 "type":"metal",
@@ -86,28 +77,10 @@
             }
         },
         {
-            "name":"curve",
-            "control_points":[
-                [0,0], [77, 0], [126.25, 0], [31.5, 40.5], [-31.25, 77.25], [24, 104], [46, 144.25], [18.75, 144.25],[0, 144.25]
-            ],
-            "material":{
-                "type":"metal",
-                "fuzz":0.2,
-                "texture":"constant",
-                "albedo":[0.917, 0.7804, 0.5294]
-            },
-            "wrapper":[
-                {
-                    "type":"translate",
-                    "displacement":[260, 200, 150]
-                }
-            ]
-        },
-        {
             "name":"sphere",
             "moving":true,
-            "center_1":[250, 400, 200],
-            "center_2":[280, 400, 200],
+            "center_1":[400, 400, 200],
+            "center_2":[430, 400, 200],
             "time0":0,
             "time1":1,
             "radius":50,
@@ -119,7 +92,7 @@
         },
         {
             "name":"sphere",
-            "center":[410, 162, -90],
+            "center":[360, 150, 145],
             "radius":70,
             "material":{
                 "type":"dielectric",
@@ -128,7 +101,7 @@
         },
         {
             "name":"sphere",
-            "center":[410, 162, -90],
+            "center":[360, 150, 145],
             "radius":70,
             "material":{
                 "type":"dielectric",
@@ -138,7 +111,7 @@
                 {
                     "type":"medium",
                     "texture":"constant",
-                    "albedo":[0.22, 0.33, 0.9],
+                    "albedo":[0.2, 0.4, 0.9],
                     "density":0.2
                 }
             ]
@@ -162,7 +135,7 @@
         },
         {
             "name":"sphere",
-            "center":[400, 300, 320],
+            "center":[400, 250, 400],
             "radius":120,
             "material":{
                 "type":"lambertian",
@@ -172,12 +145,12 @@
         },
         {
             "name":"sphere",
-            "center":[0, 350, 100],
+            "center":[220, 280, 300],
             "radius":80,
             "material":{
                 "type":"lambertian",
                 "texture":"perlin",
-                "scale":9
+                "scale":10
             }
         },
         {
@@ -186,7 +159,7 @@
         {
             "name": "mesh",
             "path": "../OBJ-Models/fixed.perfect.dragon.100K.0.07.obj",
-            "scale": 120,
+            "scale": 110,
             "material": {
                 "type": "dielectric",
                 "refraction_index":1.4
@@ -200,9 +173,9 @@
                 {
                     "type": "translate",
                     "displacement": [
-                        190,
-                        165,
-                        -160
+                        230,
+                        178,
+                        -30
                     ]
                 }
             ]
