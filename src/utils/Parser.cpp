@@ -1,4 +1,4 @@
-#include "Controller.hpp"
+#include "Parser.hpp"
 #include "BVH.hpp"
 #include "Curve.hpp"
 #include "HitableList.hpp"
@@ -32,93 +32,9 @@ Vector3f create_from_json_array(const Value &array)
     return Vector3f(array[0].GetFloat(), array[1].GetFloat(), array[2].GetFloat());
 }
 
-void Controller::set_camera_param(const Vector3f &look_from, const Vector3f &look_at, const Vector3f up, float vfov,
-                                  float aperture, float focus_d, float time_0, float time_1)
+SceneInfo Parser::parse(const char *filename) //解析表示输入场景的json文件
 {
-    camera = Camera(look_from, look_at, up, vfov, w_h_ratio, aperture, focus_d, time_0, time_1);
-}
-
-void Controller::set_imgae_param(int height_, float w_h_ratio_, int sample_num_)
-{
-    height = height_;
-    w_h_ratio = w_h_ratio_;
-    sample_num = sample_num_;
-}
-
-void Controller::set_scene(shared_ptr<Hitable> world_) { world = world_; }
-
-void Controller::generate_pic() const
-{
-    double begin_time = omp_get_wtime();
-    int width = w_h_ratio * height;
-    std::cout << "Width = " << width << ", Height = " << height << "\n";
-    // allocate buffer
-    Vector3f **pic_buffer = new Vector3f *[height];
-    for (int i = 0; i < height; ++i)
-        pic_buffer[i] = new Vector3f[width];
-    //因为光线是根据(x/width, y/height)生成，从左下为原点
-    //但是ppm格式是从左上角开始，因此y需要倒序
-    int processed = 0;
-#pragma omp parallel for num_threads(8) schedule(dynamic, 1)
-    for (int y = height - 1; y >= 0; --y)
-    {
-#pragma omp atomic
-        processed++;
-#pragma omp critical(stdout)
-        std::cout << "(" << 100 * processed / height << "%)\r" << std::flush;
-        for (int x = 0; x < width; ++x)
-        {
-            Vector3f col(0, 0, 0);
-            Vector3f temp;
-            //抗锯齿采样
-            for (int s = 0; s < sample_num; ++s)
-            {
-                //这个地方很重要，将(u,v)映射为(0,1)范围，这样nx和ny
-                //就只是图像的一个大小比例，而不会影响图像的显示范围
-                float u = float(x + get_frand()) / float(width - 1);
-                float v = float(y + get_frand()) / float(height - 1);
-                Ray r = camera.get_ray(u, v);
-                temp = color(r, world, sample_list, 0);
-#ifdef DEBUG
-                if (temp[0] != temp[0] || temp[1] != temp[1] || temp[2] != temp[2])
-                {
-                    std::cout << temp << "\n";
-                    std::cerr << "Meet NaN\n";
-                }
-#endif
-                col += temp;
-            }
-            col = col / float(sample_num);
-            col = Vector3f(sqrt(col[0]), sqrt(col[1]), sqrt(col[2])); //使用gamma2校验
-            pic_buffer[y][x] = col;
-        }
-    }
-
-    ofstream output(save_path, std::ios::out | std::ios::trunc);
-    output << "P3\n" << width << " " << height << "\n255\n";
-    for (int y = height - 1; y >= 0; --y)
-        for (int x = 0; x < width; ++x)
-        {
-            const Vector3f &col = pic_buffer[y][x];
-            int ir = int(255.99 * col[0]);
-            int ig = int(255.99 * col[1]);
-            int ib = int(255.99 * col[2]);
-            // if (ir > 255 || ig > 255 || ib > 255)
-            // std::cerr << "Value more than 255\n";
-            output << imin(255, ir) << " " << imin(255, ig) << " " << imin(255, ib) << "\n";
-            // std::cout << ir << " " << ig << " " << ib << "\n";
-        }
-    output.close();
-    for (int i = 0; i < height; ++i)
-        delete[] pic_buffer[i];
-    delete[] pic_buffer;
-    double elapsed_time = omp_get_wtime() - begin_time;
-    std::cout << "\nTotal time = " << elapsed_time << " s\t avg = " << elapsed_time / static_cast<double>(sample_num)
-              << " s\n";
-}
-
-bool Controller::parse(const char *filename) //解析表示输入场景的json文件
-{
+    SceneInfo info;
     /*1.读入json文件到string中*/
     ifstream ifs(filename, ios::in | ios::binary | ios::ate);
     if (!ifs)
@@ -137,59 +53,69 @@ bool Controller::parse(const char *filename) //解析表示输入场景的json�
         /*保存路径*/
         if (strcmp(itr->name.GetString(), "save_path") == 0)
         {
-            save_path = itr->value.GetString();
-            std::cout << "save path = " << save_path << "\n";
+            info.save_path = itr->value.GetString();
+            std::cout << "save path = " << info.save_path << "\n";
+        }
+        else if (strcmp(itr->name.GetString(), "alg") == 0)
+        {
+            const char *alg_name = itr->value.GetString();
+            if (strcmp(alg_name, "ppm") == 0)
+                info.alg = PPM;
+            else if (strcmp(alg_name, "pt") == 0)
+                info.alg = PT;
+            std::cout << "algorithm : " << alg_name << "\n";
         }
         else if (strcmp(itr->name.GetString(), "height") == 0)
         {
-            height = itr->value.GetInt();
-            std::cout << "pic height = " << height << "\n";
+            info.height = itr->value.GetInt();
+            std::cout << "pic height = " << info.height << "\n";
         }
         else if (strcmp(itr->name.GetString(), "sample_number") == 0)
         {
-            sample_num = itr->value.GetInt();
-            std::cout << "sample num = " << sample_num << "\n";
+            info.sample_num = itr->value.GetInt();
+            std::cout << "sample num = " << info.sample_num << "\n";
         }
         else if (strcmp(itr->name.GetString(), "emit_num") == 0)
         {
-            EMIT_NUM = itr->value.GetInt();
-            std::cout << "emit num = " << EMIT_NUM << "\n";
+            info.EMIT_NUM = itr->value.GetInt();
+            std::cout << "emit num = " << info.EMIT_NUM << "\n";
         }
         else if (strcmp(itr->name.GetString(), "alpha") == 0)
         {
-            ALPHA = itr->value.GetFloat();
-            std::cout << "alpha = " << ALPHA << "\n";
+            info.ALPHA = itr->value.GetFloat();
+            std::cout << "alpha = " << info.ALPHA << "\n";
         }
-        else if (strcmp(itr->name.GetString(), "ppm_depth") == 0)
+        else if (strcmp(itr->name.GetString(), "depth") == 0)
         {
-            DEPTH = itr->value.GetInt();
-            std::cout << "ppm depth = " << DEPTH << "\n";
+            info.DEPTH = itr->value.GetInt();
+            std::cout << "depth = " << info.DEPTH << "\n";
         }
         else if (strcmp(itr->name.GetString(), "iter") == 0)
         {
-            ITER = itr->value.GetInt();
-            std::cout << "iter num = " << ITER << "\n";
+            info.ITER = itr->value.GetInt();
+            std::cout << "iter num = " << info.ITER << "\n";
+        }
+        else if (strcmp(itr->name.GetString(), "init_radius") == 0) /*相机*/
+        {
+            info.init_r = itr->value.GetFloat();
+            std::cout << "ppm init radius = " << info.init_r << "\n";
         }
         else if (strcmp(itr->name.GetString(), "camera") == 0) /*相机*/
         {
             const Value &camera_info = itr->value;
-            parse_camera(camera_info);
+            info.camera = parse_camera(camera_info);
+            info.w_h_ratio = camera_info["w_h_ratio"].GetFloat(); //长宽比
             std::cout << split_line;
-        }
-        else if (strcmp(itr->name.GetString(), "init_radius") == 0) /*相机*/
-        {
-            init_r = itr->value.GetFloat();
-            std::cout << "ppm init radius = " << init_r << "\n";
         }
         else if (strcmp(itr->name.GetString(), "lights") == 0)
         {
             std::cout << "Lights\n";
             const Value &lights_info = itr->value;
-            lights = make_shared<HitableList>();
+            info.lights = make_shared<HitableList>();
             for (auto imp_itr = lights_info.Begin(); imp_itr != lights_info.End(); ++imp_itr)
             {
                 shared_ptr<Hitable> imp_obj = parse_hitable(*imp_itr);
-                lights->add_hitable(imp_obj);
+                info.lights->add_hitable(imp_obj);
                 std::cout << "Brightness = " << imp_obj->material_p->get_bright() << "\n";
             }
         }
@@ -203,7 +129,7 @@ bool Controller::parse(const char *filename) //解析表示输入场景的json�
                 shared_ptr<Hitable> imp_obj = parse_hitable(*imp_itr);
                 imp_list->add_hitable(imp_obj);
             }
-            sample_list = imp_list;
+            info.sample_list = imp_list;
             std::cout << split_line;
         }
         else if (strcmp(itr->name.GetString(), "scene") == 0) /*场景*/
@@ -217,11 +143,11 @@ bool Controller::parse(const char *filename) //解析表示输入场景的json�
             }
         }
     }
-    world = make_shared<BVHNode>(objects, 0, objects.size(), 0.0, 1.0);
-    return true;
+    info.world = make_shared<BVHNode>(objects, 0, objects.size(), 0.0, 1.0);
+    return info;
 }
 
-shared_ptr<Hitable> Controller::parse_sphere(const Value &json)
+shared_ptr<Hitable> Parser::parse_sphere(const Value &json)
 {
     shared_ptr<Hitable> sphere;
     shared_ptr<Material> m_p = parse_material(json["material"]);
@@ -254,7 +180,7 @@ shared_ptr<Hitable> Controller::parse_sphere(const Value &json)
     return sphere;
 }
 
-shared_ptr<Hitable> Controller::parse_mesh(const Value &json)
+shared_ptr<Hitable> Parser::parse_mesh(const Value &json)
 {
     const char *filename = json["path"].GetString();
     shared_ptr<Material> m_p = parse_material(json["material"]);
@@ -272,7 +198,7 @@ shared_ptr<Hitable> Controller::parse_mesh(const Value &json)
     return mesh;
 }
 
-shared_ptr<Hitable> Controller::parse_rect(const Value &json)
+shared_ptr<Hitable> Parser::parse_rect(const Value &json)
 {
     string type(json["type"].GetString());
     shared_ptr<Hitable> rect(nullptr);
@@ -306,7 +232,7 @@ shared_ptr<Hitable> Controller::parse_rect(const Value &json)
     return rect;
 }
 
-shared_ptr<Hitable> Controller::parse_box(const Value &json)
+shared_ptr<Hitable> Parser::parse_box(const Value &json)
 {
     const Value &left_bottom_info = json["left_bottom"];
     const Value &right_top_info = json["right_top"];
@@ -325,7 +251,7 @@ shared_ptr<Hitable> Controller::parse_box(const Value &json)
     return box;
 }
 
-shared_ptr<Hitable> Controller::parse_curve(const Value &json)
+shared_ptr<Hitable> Parser::parse_curve(const Value &json)
 {
     vector<Vector2f> control_points;
     const Value &control_point_info = json["control_points"];
@@ -345,7 +271,7 @@ shared_ptr<Hitable> Controller::parse_curve(const Value &json)
     return curve;
 }
 
-shared_ptr<Material> Controller::parse_material(const Value &json)
+shared_ptr<Material> Parser::parse_material(const Value &json)
 {
     string type(json["type"].GetString());
     shared_ptr<Material> m_p(nullptr);
@@ -384,7 +310,7 @@ shared_ptr<Material> Controller::parse_material(const Value &json)
     return m_p;
 }
 
-shared_ptr<Texture> Controller::parse_texture(const Value &json)
+shared_ptr<Texture> Parser::parse_texture(const Value &json)
 {
     string texture(json["texture"].GetString());
     std::cout << "Texture = " << texture << "\n";
@@ -427,7 +353,7 @@ shared_ptr<Texture> Controller::parse_texture(const Value &json)
     return nullptr;
 }
 
-shared_ptr<Hitable> Controller::parser_wrapper(const Value &json, shared_ptr<Hitable> hitable)
+shared_ptr<Hitable> Parser::parser_wrapper(const Value &json, shared_ptr<Hitable> hitable)
 {
     string type = json["type"].GetString();
     std::cout << "Wrapper = " << type << "\n";
@@ -464,15 +390,15 @@ shared_ptr<Hitable> Controller::parser_wrapper(const Value &json, shared_ptr<Hit
     return nullptr;
 }
 
-void Controller::parse_camera(const rapidjson::Value &camera_info)
+shared_ptr<Camera> Parser::parse_camera(const rapidjson::Value &camera_info)
 {
     const Value &look_from_info = camera_info["look_from"];
     const Value &look_at_info = camera_info["look_at"];
     const Value &up_info = camera_info["up"];
-    const float vfov = camera_info["vfov"].GetFloat();         //视角，角度制
-    w_h_ratio = camera_info["w_h_ratio"].GetFloat();           //长宽比
-    const float aperture = camera_info["aperture"].GetFloat(); //孔径，可以形成景深效果
-    const float focus_d = camera_info["focus_d"].GetFloat();   //焦距，即投影平面距离
+    const float vfov = camera_info["vfov"].GetFloat();           //视角，角度制
+    const float w_h_ratio = camera_info["w_h_ratio"].GetFloat(); //长宽比
+    const float aperture = camera_info["aperture"].GetFloat();   //孔径，可以形成景深效果
+    const float focus_d = camera_info["focus_d"].GetFloat();     //焦距，即投影平面距离
     float time_0 = 0., time_1 = 1.;
     auto time_itr = camera_info.FindMember("time");
     if (time_itr != camera_info.MemberEnd())
@@ -483,14 +409,17 @@ void Controller::parse_camera(const rapidjson::Value &camera_info)
     Vector3f look_from = create_from_json_array(look_from_info);
     Vector3f look_at = create_from_json_array(look_at_info);
     Vector3f up = create_from_json_array(up_info);
-    camera = Camera(look_from, look_at, up, vfov, w_h_ratio, aperture, focus_d, time_0, time_1);
+    shared_ptr<Camera> camera =
+        make_shared<Camera>(look_from, look_at, up, vfov, w_h_ratio, aperture, focus_d, time_0, time_1);
+
     std::cout << "[Camera]\nlook from = " << look_from << ", look at = " << look_at << ", up = " << up << "\n";
     std::cout << "weight height ratio = " << w_h_ratio;
     std::cout << ", vfov = " << vfov << ", aperture = " << aperture << ", focus distance = " << focus_d << ", time = ["
               << time_0 << ", " << time_1 << "]\n";
+    return camera;
 }
 
-shared_ptr<Hitable> Controller::parse_hitable(const rapidjson::Value &json)
+shared_ptr<Hitable> Parser::parse_hitable(const rapidjson::Value &json)
 {
     shared_ptr<Hitable> hitable(nullptr);
     auto itr = json.FindMember("name");

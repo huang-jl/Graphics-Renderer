@@ -1,7 +1,9 @@
 {
+    "alg": "pt",
     "save_path": "./output_pt.ppm",
-    "sample_number": 4000,
-    "height":1024,
+    "sample_number": 200,
+    "depth": 50,
+    "height": 500,
     "camera": {
         "look_from": [
             278,

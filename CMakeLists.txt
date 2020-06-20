@@ -23,7 +23,7 @@ ENDIF()
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 message(${CMAKE_CXX_FLAGS})
 
-set(LIBS core geometric scene utils)
+set(LIBS core geometric scene utils alg)
 
 ADD_SUBDIRECTORY(deps/vecmath)
 

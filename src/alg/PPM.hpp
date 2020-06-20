@@ -2,10 +2,11 @@
 #define PPM_HPP
 
 #include "Camera.hpp"
-#include "Controller.hpp"
 #include "Hitable.hpp"
 #include "HitableList.hpp"
+#include "Parser.hpp"
 #include "Ray.hpp"
+#include "RenderAlg.hpp"
 #include "Utils.hpp"
 
 #define THREADS_NUM 8
@@ -56,27 +57,28 @@ Vector3f node_min(KDNode *a, KDNode *b);
 /****************************************
  * 渐进光子映射
  ****************************************/
-class PPM
+class ProgressivePhotonMapping : public RenderAlg
 {
   public:
-    PPM(const char *filename);
-    ~PPM();
-    void run();
-    void ray_tracing(const Ray &r, int x, int y);
+    ProgressivePhotonMapping(const SceneInfo &info);
+    ~ProgressivePhotonMapping();
+    void run() override;
+    void ray_tracing(const Ray &r, int x, int y, int spp, bool save = false);
     void photon_tracing(const Ray &r, Photon photon);
     void update(HitPoint &view_point);
     void build_kd_tree(KDNode *&now, std::vector<Photon> &l, int start, int end, int dim = 0);
-    void save(int iter)const;
+    void save() override;
 
     /*data*/
-    Controller controller;
     Vector3f **pic;
-    int width;
-    int height;
     int DEPTH;
     int ITER;
     int EMIT_NUM; //每轮发射光子数
+    int sample_num;
     float ALPHA;
+    float init_r;
+    shared_ptr<HitableList> lights;
+
     std::vector<HitPoint> view_points;
     std::vector<Photon> photon_map;
 

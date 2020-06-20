@@ -8,20 +8,10 @@
 using std::make_shared;
 using std::shared_ptr;
 
-#define MAX_DEPTH 50
 #define EPS 1e-3
 
 class Ray;
 class Hitable;
-
-/******************************
- 光线追踪的关键函数
-    input:
-        r——待求交的光线
-        world——物体，是一个Hitable list
-        depth——递归深度
- ******************************/
-Vector3f color(const Ray &r, shared_ptr<Hitable> world, shared_ptr<Hitable> fake_light, int depth);
 
 /******************************
  反射的关键函数

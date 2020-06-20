@@ -23,55 +23,6 @@ float ffmin(float a, float b) { return (a < b) ? a : b; }
 float ffmax(float a, float b) { return (a < b) ? b : a; }
 int imin(int a, int b) { return (a < b) ? a : b; }
 int imax(int a, int b) { return (a > b) ? a : b; }
-/******************************
- 光线追踪的关键函数
-    input:
-        r——待求交的光线
-        world——物体，是一个Hitable
-        fake_light——表明光源的位置、大小，不参与真正的绘制
-        depth——递归深度
- ******************************/
-Vector3f color(const Ray &r, shared_ptr<Hitable> world, shared_ptr<Hitable> sample_list, int depth)
-{
-    Hit rec;
-    //当交点处的t<0.001的时候，认为不相交，从而能绘出阴影的效果
-    if (world->hit(r, 0.001, FLT_MAX, rec))
-    {
-        //根据法向量构建颜色，最后的图像颜色和法向量有关(x,y,z)<=>(r,g,b)
-        //采用递归的方式
-        //有散射的物体本身没有颜色，它的颜色通过其之后的光线射中的位置确定
-        //这里的attenuation是反射的系数，它会吸收相应的光线能量
-        //最终的颜色为A*s(direction)*color(direction)/p(direction)
-        ScatterRecord scattered;
-        Vector3f emitted = rec.material_p->emitted(rec, rec.u, rec.v, rec.p);
-        if (depth < MAX_DEPTH && rec.material_p->scatter(r, rec, scattered))
-        {
-            if (scattered.is_specular) //如果是镜面反射光线，不能直接对光源采样
-            {
-                return scattered.attenuation * color(scattered.specular_ray, world, sample_list, depth + 1);
-            }
-            else
-            {
-                // (optional By dreamHuang)TODO:可以a时发送多个反射光线，一根去光源，一根反射
-                shared_ptr<PDF> hit_pdf_ptr = make_shared<HitablePDF>(sample_list, rec.p);
-                MixturePDF mix_pdf(hit_pdf_ptr, scattered.pdf_ptr);
-                Ray reflect_r(rec.p, mix_pdf.generate(), r.time());
-                float pdf_val = mix_pdf.value(reflect_r.direction());
-                // Ray reflect_r(rec.p, scattered.pdf_ptr->generate(), r.time());
-                // float pdf_val = scattered.pdf_ptr->value(reflect_r.direction());
-                return emitted + scattered.attenuation * rec.material_p->scattering_pdf(r, rec, reflect_r) *
-                                     color(reflect_r, world, sample_list, depth + 1) / pdf_val;
-            }
-        }
-        else
-            return emitted;
-    }
-    else
-        return Vector3f(0, 0, 0);
-    // else
-    // return Vector3f(0.70, 0.80, 1.00);
-    // return Vector3f(0.15, 0.22, 0.68); //蓝色背景
-}
 
 shared_ptr<Hitable> generate_scene()
 {
@@ -281,7 +232,7 @@ Vector3f random_cosine_direction()
 {
     float r1 = get_frand();
     float r2 = get_frand();
-    float z = sqrtf(1 - r2);
+    float z = sqrtf(1 - r2);    //assert(z>0)
     float phi = 2.0 * M_PI * r1;
     float x = cosf(phi) * sqrt(r2);
     float y = sinf(phi) * sqrt(r2);

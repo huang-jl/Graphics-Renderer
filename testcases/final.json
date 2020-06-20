@@ -1,6 +1,8 @@
 {
+    "alg":"pt",
     "save_path": "./output_final.ppm",
-    "sample_number": 4300,
+    "sample_number": 10,
+    "depth": 50,
     "height": 1024,
     "camera": {
         "look_from": [
@@ -20,7 +22,7 @@
             0
         ],
         "aperture": 0,
-        "w_h_ratio": 1.0,
+        "w_h_ratio": 1.897,
         "vfov": 40,
         "time":[0, 1]
     },

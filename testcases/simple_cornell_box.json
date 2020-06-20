@@ -1,7 +1,9 @@
 {
+    "alg":"pt",
     "save_path": "./output_cornell.ppm",
-    "sample_number": 100,
-    "height": 500,
+    "sample_number": 2300,
+    "height": 1024,
+    "depth": 50,
     "camera": {
         "look_from": [
             278,
@@ -34,18 +36,6 @@
                 332,
                 554
             ],
-            "material": {
-                "type": "null"
-            }
-        },
-        {
-            "name": "sphere",
-            "center": [
-                190,
-                90,
-                190
-            ],
-            "radius": 90,
             "material": {
                 "type": "null"
             }
@@ -154,7 +144,8 @@
             ],
             "material": {
                 "type": "lambertian",
-                "texture": "constant",
+                "texture": "image",
+                "path": "../coorful-flowers.jpg",
                 "albedo": [
                     0.73,
                     0.73,
@@ -197,19 +188,6 @@
             ]
         },
         {
-            "name": "sphere",
-            "center": [
-                190,
-                90,
-                190
-            ],
-            "radius": 90,
-            "material": {
-                "type": "dielectric",
-                "refraction_index": 1.5
-            }
-        },
-        {
             "name": "box",
             "left_bottom": [
                 0,
@@ -218,7 +196,7 @@
             ],
             "right_top": [
                 165,
-                330,
+                230,
                 165
             ],
             "material": {
@@ -243,6 +221,44 @@
                         265,
                         0,
                         295
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "sphere",
+            "center": [
+                365,
+                281,
+                380
+            ],
+            "radius": 50,
+            "material": {
+                "type": "metal",
+                "fuzz":0.1,
+                "albedo":[0.749, 0.6784, 0.3353]
+            }
+        },
+        {
+            "name": "mesh",
+            "path": "../OBJ-Models/fixed.perfect.dragon.100K.0.07.obj",
+            "scale": 180,
+            "material": {
+                "type": "dielectric",
+                "refraction_index": 1.4
+            },
+            "wrapper": [
+                {
+                    "type": "rotate",
+                    "degree": 160,
+                    "axis": 1
+                },
+                {
+                    "type": "translate",
+                    "displacement": [
+                        230,
+                        130,
+                        200
                     ]
                 }
             ]

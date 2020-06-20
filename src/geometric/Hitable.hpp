@@ -63,7 +63,7 @@ class FlipFace : public Hitable
     {
         return hitable->pdf_value(o, dir);
     }
-    //产生一个随机方向，表示散射的光线方向，起点为o
+    //产生一个随机点，用于直接采样，起点为o，返回一个光线方向
     virtual Vector3f random(const Vector3f &o) const override { return hitable->random(o); }
 
     /*data*/
