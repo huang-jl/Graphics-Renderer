@@ -45,67 +45,23 @@
 > *<font color='red'>所有图片原始均为.ppm格式，文件夹中有png格式为用其他工具转换后的结果</font>*
 
 ### 光子映射效果
-<center>
-    <img style="border-radius: 0.3125em;
-    box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);" 
-    src="./PT/final_pic/png/final_ppm_40.png" width="80%">
-    <br>
-    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
-    display: inline-block;
-    color: #999;
-    padding: 2px;">渐进光子映射，发射光子30w，迭代共1500轮</div>
-</center>
+![渐进光子映射](https://gitee.com/huang-jl/Graphics-Renderer/blob/master/final_pic/final_ppm_40.png)
 
 ### 光线追踪结果（对比）
-<center>
-    <img style="border-radius: 0.3125em;
-    box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);" 
-    src="./PT/final_pic/png/pt_cornell.png" width="80%">
-    <br>
-    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
-    display: inline-block;
-    color: #999;
-    padding: 2px;">光线追踪，spp=4000</div>
-</center>
+![光线追踪PPM对比](https://gitee.com/huang-jl/Graphics-Renderer/blob/master/final_pic/pt_cornell.png)
+
 ---
 ### 参与介质
-下面是一张带有参与介质(participating media)的效果图，能够发现周围场景中**包含一种雾气的感觉**，具体是使用了一个半径很大的球体包住了整个场景，这个球体的材质为参与介质
-<center>
-    <img style="border-radius: 0.3125em;
-    box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);" 
-    src="./PT/final_pic/png/output_1080p.png" width="80%">
-    <br>
-    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
-    display: inline-block;
-    color: #999;
-    padding: 2px;">光线追踪，spp=5000</div>
-</center>
+下面是一张带有参与介质(participating media)的效果图，能够发现周围场景中**包含一种雾气的感觉**，具体是使用了一个半径很大的球体包住了整个场景，这个球体的材质为参与介质  
+![参与介质PT](https://gitee.com/huang-jl/Graphics-Renderer/blob/master/final_pic/output_1080p.png)
 
 ### 不含参与介质（对比）
-相对应的不包括参与介质的效果图如下
-<center>
-    <img style="border-radius: 0.3125em;
-    box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);" 
-    src="./PT/final_pic/png/output_origin_1080p.png" width="80%">
-    <br>
-    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
-    display: inline-block;
-    color: #999;
-    padding: 2px;">光线追踪，spp=5000</div>
-</center>
+相对应的不包括参与介质的效果图如下  
+![无参与介质PT](https://gitee.com/huang-jl/Graphics-Renderer/blob/master/final_pic/output_origin_1080p.png)
 
 ### 景深
 最后是景深效果展示如下图
-<center>
-    <img style="border-radius: 0.3125em;
-    box-shadow: 0 2px 4px 0 rgba(34,36,38,.12),0 2px 10px 0 rgba(34,36,38,.08);" 
-    src="./PT/final_pic/png/output_origin_1080p.png" width="80%">
-    <br>
-    <div style="color:orange; border-bottom: 1px solid #d9d9d9;
-    display: inline-block;
-    color: #999;
-    padding: 2px;">光线追踪，spp=5000</div>
-</center>
+
 
 ## 编译与运行
 ```
