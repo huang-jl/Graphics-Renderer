@@ -1,10 +1,10 @@
 {
     "alg": "ppm",
     "save_path": "./output_ppm.ppm",
-    "sample_number": 5,
+    "sample_number": 40,
     "height": 1024,
     "emit_num": 300000,
-    "iter": 1500,
+    "iter": 1250,
     "depth": 20,
     "alpha": 0.7,
     "init_radius": 4,

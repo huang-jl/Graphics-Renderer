@@ -135,7 +135,7 @@ shared_ptr<Hitable> random_box()
             float x1 = x0 + w;
             float y1 = 100 * (get_frand() + 0.01);
             float z1 = z0 + w;
-            if ((i == 11 || i == 12) && (j == 7 || j == 8))
+            if ((i == 11 || i == 12 || i==13) && (j == 7 || j == 8))
             {
                 y1 = 80;
             }

@@ -2,7 +2,7 @@
     "alg":"pt",
     "save_path": "./output_cornell.ppm",
     "sample_number": 2300,
-    "height": 1024,
+    "height": 500,
     "depth": 50,
     "camera": {
         "look_from": [

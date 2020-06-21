@@ -51,12 +51,12 @@ void ProgressivePhotonMapping::run()
         std::cout << "[PT] " << 100.0 * processed / height << " %\r" << std::flush;
         for (int x = 0; x < width; ++x)
         {
-            for (int i = 0; i < 3500; ++i)
+            for (int i = 0; i < 2500; ++i)
             {
                 float u = float(x + get_frand()) / float(width - 1);
                 float v = float(y + get_frand()) / float(height - 1);
                 Ray r_init = camera_p->get_ray(u, v);
-                ray_tracing(r_init, x, y, sample_num + 3500, false);
+                ray_tracing(r_init, x, y, sample_num + 2500, false);
             }
         }
     }
@@ -72,7 +72,7 @@ void ProgressivePhotonMapping::run()
                 float u = float(x + get_frand()) / float(width - 1);
                 float v = float(y + get_frand()) / float(height - 1);
                 Ray r_init = camera_p->get_ray(u, v);
-                ray_tracing(r_init, x, y, sample_num + 3500, true);
+                ray_tracing(r_init, x, y, sample_num + 2500, true);
             }
         }
     std::cout << "view points num = " << view_points.size() << "\n";
@@ -137,8 +137,8 @@ void ProgressivePhotonMapping::run()
     float max_radius = -INT_MAX;
     for (const HitPoint &view_point : view_points)
     {
-        Vector3f color =
-            3500 * view_point.flux / (M_PI * view_point.current_r * view_point.current_r * total_photon_num);
+        Vector3f color = 17500 * view_point.flux /
+                         (M_PI * view_point.current_r * view_point.current_r * total_photon_num * sample_num);
         pic[view_point.y][view_point.x] += color;
         min_radius = ffmin(min_radius, view_point.current_r);
         max_radius = ffmax(max_radius, view_point.current_r);

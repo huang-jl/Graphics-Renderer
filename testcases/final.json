@@ -1,9 +1,9 @@
 {
     "alg":"pt",
     "save_path": "./output_final.ppm",
-    "sample_number": 10,
+    "sample_number": 50,
     "depth": 50,
-    "height": 1024,
+    "height": 400,
     "camera": {
         "look_from": [
             478,
@@ -21,8 +21,8 @@
             1,
             0
         ],
-        "aperture": 0,
-        "w_h_ratio": 1.897,
+        "aperture": 0.05,
+        "w_h_ratio": 1.778,
         "vfov": 40,
         "time":[0, 1]
     },
@@ -31,10 +31,10 @@
             "name": "rect",
             "type": "xz",
             "boundary": [
-                123,
-                423,
-                97,
-                362,
+                53,
+                473,
+                47,
+                322,
                 554
             ],
             "material": {
@@ -47,10 +47,10 @@
             "name": "rect",
             "type": "xz",
             "boundary": [
-                123,
-                423,
-                97,
-                362,
+                53,
+                473,
+                47,
+                322,
                 554
             ],
             "material": {
@@ -69,7 +69,7 @@
         },
         {
             "name":"sphere",
-            "center":[100, 230, 170],
+            "center":[80, 290, 140],
             "radius":80,
             "material":{
                 "type":"metal",
@@ -79,7 +79,7 @@
         },
         {
             "name":"sphere",
-            "center":[0, 170, 45],
+            "center":[-50, 170, 25],
             "radius":70,
             "material":{
                 "type":"metal",
@@ -101,15 +101,15 @@
             "wrapper":[
                 {
                     "type":"translate",
-                    "displacement":[260, 200, 150]
+                    "displacement":[465, 160, 150]
                 }
             ]
         },
         {
             "name":"sphere",
             "moving":true,
-            "center_1":[250, 400, 200],
-            "center_2":[280, 400, 200],
+            "center_1":[430, 400, 200],
+            "center_2":[460, 400, 200],
             "time0":0,
             "time1":1,
             "radius":50,
@@ -121,7 +121,7 @@
         },
         {
             "name":"sphere",
-            "center":[410, 162, -90],
+            "center":[360, 162, -70],
             "radius":70,
             "material":{
                 "type":"dielectric",
@@ -130,7 +130,7 @@
         },
         {
             "name":"sphere",
-            "center":[410, 162, -90],
+            "center":[360, 162, -70],
             "radius":70,
             "material":{
                 "type":"dielectric",
@@ -140,7 +140,7 @@
                 {
                     "type":"medium",
                     "texture":"constant",
-                    "albedo":[0.22, 0.33, 0.9],
+                    "albedo":[0.05, 0.55, 0.95],
                     "density":0.2
                 }
             ]
@@ -164,7 +164,7 @@
         },
         {
             "name":"sphere",
-            "center":[400, 300, 320],
+            "center":[650, 250, 320],
             "radius":120,
             "material":{
                 "type":"lambertian",
@@ -174,7 +174,7 @@
         },
         {
             "name":"sphere",
-            "center":[0, 350, 100],
+            "center":[-140, 180, -100],
             "radius":80,
             "material":{
                 "type":"lambertian",
@@ -183,12 +183,37 @@
             }
         },
         {
+            "name":"rect",
+            "type":"xy",
+            "boundary":[-600, 1320, 0, 900, 470],
+            "material":{
+                "type":"lambertian",
+                "texture":"image",
+                "path":"../multicolor.jpg"
+            },
+            "wrapper":[
+                {
+                    "type":"flip"
+                }
+            ]
+        },
+        {
+            "name":"rect",
+            "type":"yz",
+            "boundary":[0, 900, -305, 320, -320],
+            "material":{
+                "type":"lambertian",
+                "texture":"image",
+                "path":"../multicolor.jpg"
+            }
+        },
+        {
             "name":"random_box"
         },
         {
             "name": "mesh",
             "path": "../OBJ-Models/fixed.perfect.dragon.100K.0.07.obj",
-            "scale": 120,
+            "scale": 150,
             "material": {
                 "type": "dielectric",
                 "refraction_index":1.4
@@ -202,9 +227,9 @@
                 {
                     "type": "translate",
                     "displacement": [
-                        190,
-                        165,
-                        -160
+                        240,
+                        186,
+                        -180
                     ]
                 }
             ]
