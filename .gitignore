@@ -1,9 +1,9 @@
-CMakeFils/
+CMakeFiles/
 cmake*
 CMake*
-output*
 main
 bin/
+build/
 **/*.a
 !CMakeLists.txt
 **/Makefile
