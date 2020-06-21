@@ -1,4 +1,5 @@
 {
+    "alg":"pt",
     "save_path": "./output_bezier.ppm",
     "sample_number": 500,
     "height": 500,

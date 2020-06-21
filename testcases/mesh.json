@@ -1,4 +1,5 @@
 {
+    "alg":"pt",
     "save_path": "./output.ppm",
     "sample_number": 50,
     "height": 500,

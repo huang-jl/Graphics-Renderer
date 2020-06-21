@@ -1,9 +1,9 @@
 {
     "alg":"pt",
     "save_path": "./output_final.ppm",
-    "sample_number": 50,
+    "sample_number": 5000,
     "depth": 50,
-    "height": 400,
+    "height": 1080,
     "camera": {
         "look_from": [
             478,
@@ -169,7 +169,7 @@
             "material":{
                 "type":"lambertian",
                 "texture":"image",
-                "path":"../blue_ice.jpg"
+                "path":"../texture/blue_ice.jpg"
             }
         },
         {
@@ -189,7 +189,7 @@
             "material":{
                 "type":"lambertian",
                 "texture":"image",
-                "path":"../multicolor.jpg"
+                "path":"../texture/multicolor.jpg"
             },
             "wrapper":[
                 {
@@ -204,7 +204,7 @@
             "material":{
                 "type":"lambertian",
                 "texture":"image",
-                "path":"../multicolor.jpg"
+                "path":"../texture/multicolor.jpg"
             }
         },
         {
